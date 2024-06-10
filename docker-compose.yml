@@ -1,18 +1,23 @@
 version: '3.8'
 services:
   client-backend:
-    image: client:0.0.2
+    image: client:0.0.6
     container_name: client-backend
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-#    depends_on:
-#      - service-db
+    depends_on:
+      - service-db
     environment:
       - SERVER_PORT= 8080
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/books_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/broken_store
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+#      - SPRING_JPA_DATABASE=postgresql
+#      - SPRING_JPA_HIBERNATE_DDL-AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-boot-ddl-auto-generator
     deploy:
       resources:
         limits:
@@ -22,26 +27,27 @@ services:
           cpus: "0.5"
           memory: 512M
 
-#  service-db:
-#    image: postgres:14.7-alpine
-#    environment:
-#      POSTGRES_USER: admin
-#      POSTGRES_PASSWORD: admin12345
-#    ports:
-#      - "15432:5432"
-#    volumes:
-#      - ./infrastructure/db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
-#      - db-data:/var/lib/postgresql/data
-#    restart: unless-stopped
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: "0.5"
-#          memory: 512M
-#        reservations:
-#          cpus: "0.5"
-#          memory: 512M
-#
+  service-db:
+    image: postgres:14.7-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: broken_store
+    ports:
+      - "15432:5432"
+    volumes:
+#      - ./db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
 ##  pgadmin:
 ##    container_name: pgadmin4_container
 ##    image: dpage/pgadmin4:7
@@ -117,6 +123,6 @@ services:
           cpus: "0.5"
           memory: 512M
 
-#volumes:
-#  db-data:
+volumes:
+  db-data:
 #  pgadmin-data:
