@@ -1,4 +1,4 @@
-package ru.eriknas.brokenstore.entities;
+package ru.eriknas.brokenstore.dto.users;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;

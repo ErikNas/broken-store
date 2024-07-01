@@ -10,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.eriknas.brokenstore.entities.UserDTO;
+import ru.eriknas.brokenstore.dto.users.UserDTO;
 
 import java.util.Collection;
 import java.util.List;

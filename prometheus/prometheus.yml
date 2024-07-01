@@ -1,0 +1,11 @@
+scrape_configs:
+  - job_name: 'spring-boot-application'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['client-backend:8080']
+
+  - job_name: cadvisor
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['cadvisor-exporter:8081']
