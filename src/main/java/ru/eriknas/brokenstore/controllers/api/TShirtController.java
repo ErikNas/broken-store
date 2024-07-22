@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.model.TShirt;
 import ru.eriknas.brokenstore.services.TShirtService;
-import ru.eriknas.brokenstore.services.TShirtRepository;
+import ru.eriknas.brokenstore.repository.TShirtRepository;
 
 import java.util.List;
 

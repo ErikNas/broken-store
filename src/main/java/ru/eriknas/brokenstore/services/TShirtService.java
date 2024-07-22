@@ -3,6 +3,7 @@ package ru.eriknas.brokenstore.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.eriknas.brokenstore.model.TShirt;
+import ru.eriknas.brokenstore.repository.TShirtRepository;
 
 import java.util.List;
 import java.util.Optional;

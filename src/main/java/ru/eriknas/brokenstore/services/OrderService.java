@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.eriknas.brokenstore.model.Order;
 import ru.eriknas.brokenstore.model.OrderRequest;
 import ru.eriknas.brokenstore.model.TShirt;
+import ru.eriknas.brokenstore.repository.OrderRepository;
+import ru.eriknas.brokenstore.repository.TShirtRepository;
 
 import java.util.Optional;
 
