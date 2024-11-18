@@ -27,7 +27,7 @@ docker compose up -d
 
 где:
 
-- *client-backend* - контейнер с бекендом приложения. Доступен по адресу http://127.0.0.1:8080, сваггер http://127.0.0.1:8080/swagger-ui/index.html
+- *client-backend* - контейнер с бекендом приложения. Доступен по адресу http://127.0.0.1:8085, сваггер http://127.0.0.1:8085/swagger-ui/index.html
 
 - *prometheus* - контейнер с prometheus, который отвечает за сбор метрик с самого приложения и с cadvisor-exporter
 Доступен по адресу http://127.0.0.1:9090
@@ -42,5 +42,5 @@ docker compose up -d
 
 Для остановки стенда необходимо выполнить
 ```Bash
-docker compose down -d
+docker compose stop
 ```

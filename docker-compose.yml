@@ -1,23 +1,23 @@
-version: '3.8'
 services:
   client-backend:
     image: client:0.0.6
-    container_name: client-backend
+    container_name: broken-store-client-backend
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8085:8080"
     depends_on:
       - service-db
     environment:
-      - SERVER_PORT= 8080
+      - SERVER_PORT=8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/broken_store
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin
-#      - SPRING_JPA_DATABASE=postgresql
-#      - SPRING_JPA_HIBERNATE_DDL-AUTO=update
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-boot-ddl-auto-generator
+      #      - SPRING_JPA_DATABASE=postgresql
+      #      - SPRING_JPA_HIBERNATE_DDL-AUTO=update
+      # - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring boot-ddl-auto-generator
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-
     deploy:
       resources:
         limits:
@@ -29,6 +29,7 @@ services:
 
   service-db:
     image: postgres:14.7-alpine
+    container_name: broken-store-postgres-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -36,7 +37,7 @@ services:
     ports:
       - "15432:5432"
     volumes:
-#      - ./db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      #      - ./db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
       - db-data:/var/lib/postgresql/data
     restart: unless-stopped
     deploy:
@@ -48,21 +49,22 @@ services:
           cpus: "0.5"
           memory: 512M
 
-##  pgadmin:
-##    container_name: pgadmin4_container
-##    image: dpage/pgadmin4:7
-##    restart: always
-##    environment:
-##      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-##      PGADMIN_DEFAULT_PASSWORD: root
-##    ports:
-##      - "5050:80"
-##    volumes:
-##      - pgadmin-data:/var/lib/pgadmin
+  ##  pgadmin:
+  ##    container_name: pgadmin4_container
+  ##    image: dpage/pgadmin4:7
+  ##    restart: always
+  ##    environment:
+  ##      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  ##      PGADMIN_DEFAULT_PASSWORD: root
+  ##    ports:
+  ##      - "5050:80"
+  ##    volumes:
+  ##      - pgadmin-data:/var/lib/pgadmin
 
   prometheus:
     image: prom/prometheus:v2.48.1
-    container_name: prometheus
+    # container_name: prometheus
+    container_name: broken-store-prometheus
     restart: unless-stopped
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -80,36 +82,38 @@ services:
           memory: 512M
 
   grafana:
-      image: grafana/grafana:9.5.15
-      container_name: grafana
-      restart: unless-stopped
-      ports:
-        - "3000:3000"
-      environment:
-        - GF_USERS_ALLOW_SIGN_UP=false
-      volumes:
-        - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/main.yaml
-      depends_on:
-        - prometheus
-      healthcheck:
-        test: [ "CMD", "nc", "-z", "localhost", "3000" ]
-      deploy:
-        resources:
-          limits:
-            cpus: "0.5"
-            memory: 512M
-          reservations:
-            cpus: "0.5"
-            memory: 512M
+    image: grafana/grafana:9.5.15
+    # container_name: grafana
+    container_name: broken-store-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/main.yaml
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "3000" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor-exporter
+    # container_name: cadvisor-exporter
+    container_name: broken-store-cadvisor-exporter
     ports:
       - 8081:8081
     volumes:
       - /:/rootfs:ro
-#      - /var/run:/var/run:rw
+      #      - /var/run:/var/run:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw  # mac
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
