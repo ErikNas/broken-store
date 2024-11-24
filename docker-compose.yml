@@ -4,7 +4,7 @@ services:
     container_name: broken-store-client-backend
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./backend/Dockerfile
     ports:
       - "8085:8080"
     depends_on:
@@ -109,6 +109,7 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     # container_name: cadvisor-exporter
     container_name: broken-store-cadvisor-exporter
+    privileged: true
     ports:
       - 8081:8081
     volumes:
