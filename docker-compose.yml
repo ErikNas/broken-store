@@ -4,7 +4,7 @@ services:
     container_name: broken-store-client-backend
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./backend/Dockerfile
     ports:
       - "8085:8080"
     depends_on:
