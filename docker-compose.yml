@@ -109,6 +109,7 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     # container_name: cadvisor-exporter
     container_name: broken-store-cadvisor-exporter
+    privileged: true
     ports:
       - 8081:8081
     volumes:
