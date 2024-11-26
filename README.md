@@ -44,3 +44,16 @@ docker compose up -d
 ```Bash
 docker compose stop
 ```
+
+### Полное удление приложения
+
+Внимание! Этот код удалит ВСЕ образы докер
+
+```Bash
+sudo docker container prune
+sudo docker volume prune
+sudo docker network prune
+sudo docker rmi $(sudo docker images -a -q)
+```
+
+TODO: Написать команды, которые будут удалять только broken-store
