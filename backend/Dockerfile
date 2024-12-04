@@ -1,6 +1,7 @@
 FROM gradle:8.7-jdk17 AS builder
 WORKDIR /app
-COPY ./backend/ /app/.
+COPY ./backend /app/.
+RUN gradle wrapper
 RUN ./gradlew clean build -x test
 
 FROM eclipse-temurin:17-jre-alpine
