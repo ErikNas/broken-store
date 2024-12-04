@@ -8,6 +8,33 @@
 
 ## Управление приложением в докере
 
+### Установка и запуск докера на Windows
+
+Для скачивания докера на Windows необходимо выполнить команду в PowerShell от имени администратора
+```Bash
+Invoke-WebRequest -Uri https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe -OutFile DockerDesktopInstaller.exe
+```
+
+Для установки докера на Windows необходимо выполнить команду в PowerShell от имени администратора
+```Bash
+Start-Process -Wait -FilePath .\DockerDesktopInstaller.exe
+```
+
+**Важно**: в процессе установки снять флажок с чекбокса «**Use WSL 2 instead of Hyper-V (recommended)**»
+
+Результат успешной установки докера:
+```Bash
+Docker Desktop 4.36.0
+Installation succeeded
+```
+
+Для запуска докера на Windows необходимо выполнить команду в PowerShell от имени администратора
+```Bash
+Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
+```
+
+Принять соглашение и авторизоваться в докере.
+
 ### Запуск приложения
 
 Для запуска приложения в докере необходимо выполнить команду
@@ -44,6 +71,11 @@ docker compose up -d
 ```Bash
 docker compose stop
 ```
+
+### Запуск контейнера в докере на Windows
+
+Перейти в Docker Desktop и запустить вручную контейнер с приложением.
+
 
 ### Полное удаление приложения
 
