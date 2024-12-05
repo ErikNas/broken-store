@@ -6,34 +6,47 @@
 Идеально подходит для целей ручного, автоматизированного и нагрузочного тестирования в качестве платформы 
 для экспериментов и проведения обучения. 
 
-## Управление приложением в докере
+## Управление приложением в Docker
 
-### Установка и запуск докера на Windows
+### Установка Docker
+<details>
 
-Для скачивания докера на Windows необходимо выполнить команду в PowerShell от имени администратора
+<summary>Docker для Windows</summary>
+
+Для скачивания Docker на Windows необходимо выполнить команду в PowerShell от имени администратора
 ```Bash
 Invoke-WebRequest -Uri https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe -OutFile DockerDesktopInstaller.exe
 ```
 
-Для установки докера на Windows необходимо выполнить команду в PowerShell от имени администратора
+Для установки Docker на Windows необходимо выполнить команду в PowerShell от имени администратора
 ```Bash
 Start-Process -Wait -FilePath .\DockerDesktopInstaller.exe
 ```
 
 **Важно**: в процессе установки снять флажок с чекбокса «**Use WSL 2 instead of Hyper-V (recommended)**»
 
-Результат успешной установки докера:
+Результат успешной установки Docker:
 ```Bash
 Docker Desktop 4.36.0
 Installation succeeded
 ```
 
-Для запуска докера на Windows необходимо выполнить команду в PowerShell от имени администратора
+Для запуска Docker на Windows необходимо выполнить команду в PowerShell от имени администратора
 ```Bash
 Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 ```
 
-Принять соглашение и авторизоваться в докере.
+Принять соглашение и авторизоваться в Docker.
+
+</details>
+
+<details><summary>Docker для Mac</summary>
+Скоро...
+</details>
+
+<details><summary>Docker для Linux</summary>
+Скоро...
+</details>
 
 ### Запуск приложения
 
