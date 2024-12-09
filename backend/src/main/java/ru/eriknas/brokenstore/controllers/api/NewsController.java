@@ -2,10 +2,11 @@ package ru.eriknas.brokenstore.controllers.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.store.NewsDTO;
@@ -14,13 +15,10 @@ import ru.eriknas.brokenstore.models.entities.NewsEntity;
 import ru.eriknas.brokenstore.services.NewsService;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/news")
-@ApiResponses(@ApiResponse(responseCode = "200", useReturnTypeSchema = true))
 public class NewsController {
 
     private final NewsService newsService;
@@ -31,26 +29,38 @@ public class NewsController {
     }
 
     @PostMapping
+    @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
     @SecurityRequirements
-    public NewsDTO addNews(@RequestBody @Validated NewsDTO newsDTO) {
+    public ResponseEntity<NewsDTO> addNews(@RequestBody @Validated NewsDTO newsDTO) {
         NewsEntity newsEntity = newsService.addNews(newsDTO);
-        return NewsMapper.toDto(newsEntity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(NewsMapper.toDto(newsEntity));
     }
 
     @DeleteMapping("/{id}")
+    @ApiResponse(responseCode = "204", description = "Новость удалена")
+    @ApiResponse(responseCode = "404", description = "Новость не найдена")
     @SecurityRequirements
-    public void deleteNews(@PathVariable @Validated @Parameter(description = "id новости") int id) {
-        newsService.deleteById(id);
+    public ResponseEntity<Void> deleteNews(@PathVariable @Validated @Parameter(description = "id новости") int id) {
+        if (newsService.getNewsById(id).isPresent()) {
+            newsService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "404", description = "Новость не найдена")
-    public Optional<NewsDTO> getNewsById(@PathVariable @Validated @Parameter(description = "id новости") int id) {
-        Optional<NewsEntity> news = newsService.getNewsById(id);
-        return news.map(NewsMapper::toDto);
+    @ApiResponse(responseCode = "200")
+    public ResponseEntity<NewsDTO> getNewsById(@PathVariable @Validated @Parameter(description = "id новости") int id) {
+        return newsService.getNewsById(id)
+                .map(NewsMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
+    @ApiResponse(responseCode = "200", useReturnTypeSchema = true)
     public Collection<NewsDTO> getAllNews(@RequestParam(required = false, defaultValue = "0")
                                           @Parameter(description = "min: 0")
                                           @Validated @Min(0) int page,
