@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.controllers.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,12 +33,10 @@ public class NewsController {
     }
 
     @PostMapping
+    @Operation(summary = "Добавить новость")
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
-    @ApiResponse(
-            responseCode = "400 BadRequest",
-            description = "Ошибка валидации",
-            content = @Content(schema = @Schema(implementation = Error.class))
-    )
+    @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
+            content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
     public ResponseEntity<NewsDTO> addNews(@RequestBody @Validated NewsDTO newsDTO) {
         NewsEntity newsEntity = newsService.addNews(newsDTO);
@@ -45,19 +44,27 @@ public class NewsController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить новость")
     @ApiResponse(responseCode = "204 NoContent", description = "Новость удалена")
-    @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена")
+    @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена",
+            content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
-    public ResponseEntity<Void> deleteNews(@PathVariable @Validated @Parameter(description = "id новости") int id) {
+    public ResponseEntity<Void> deleteNews(@PathVariable
+                                           @Validated
+                                           @Parameter(description = "id новости") int id) {
         newsService.getNewsById(id);
         newsService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{id}")
-    @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена", content = @Content)
+    @Operation(summary = "Найти новость по id")
+    @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена",
+            content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
-    public ResponseEntity<NewsDTO> getNewsById(@PathVariable @Validated @Parameter(description = "id новости") int id) {
+    public ResponseEntity<NewsDTO> getNewsById(@PathVariable
+                                               @Validated
+                                               @Parameter(description = "id новости") int id) {
         NewsEntity newsEntity = newsService.getNewsById(id);
         NewsDTO newsDTO = NewsMapper.toDto(newsEntity);
         return new ResponseEntity<>(newsDTO, HttpStatus.OK);
@@ -65,6 +72,7 @@ public class NewsController {
     }
 
     @GetMapping
+    @Operation(summary = "Получить список всех новостей")
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     public Collection<NewsDTO> getAllNews(@RequestParam(required = false, defaultValue = "0")
                                           @Parameter(description = "min: 0")
