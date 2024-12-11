@@ -8,17 +8,17 @@ import ru.eriknas.brokenstore.dto.store.TShirtsDTO;
 import ru.eriknas.brokenstore.exception.NotFoundException;
 import ru.eriknas.brokenstore.mappers.TShirtsMapper;
 import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
-import ru.eriknas.brokenstore.repository.TShirtsRepository;
+import ru.eriknas.brokenstore.repository.TShirtRepository;
 
 @Service
-public class TShirtsService {
+public class TShirtService {
 
-    private final TShirtsRepository tShirtsRepository;
+    private final TShirtRepository tShirtsRepository;
 
     private static final String TSHIRT_NOT_FOUND = "Футболка с id=%s не найдена";
 
     @Autowired
-    public TShirtsService(TShirtsRepository repository) {
+    public TShirtService(TShirtRepository repository) {
         this.tShirtsRepository = repository;
     }
 
@@ -50,10 +50,6 @@ public class TShirtsService {
     public TShirtsEntity getTShirtById(Integer id) {
         return tShirtsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, id)));
-    }
-
-    public boolean existsById(Integer id) {
-        return tShirtsRepository.findById(id).isEmpty();
     }
 
     public Page<TShirtsEntity> getAllTShirts(int page, int size) {

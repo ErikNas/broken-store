@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "t_shirts", uniqueConstraints = @UniqueConstraint(columnNames = "article"))
+@Table(name = "t_shirt", uniqueConstraints = @UniqueConstraint(columnNames = "article"))
 public class TShirtsEntity {
 
     @Id

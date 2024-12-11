@@ -15,34 +15,33 @@ import ru.eriknas.brokenstore.dto.store.TShirtsDTO;
 import ru.eriknas.brokenstore.mappers.TShirtsMapper;
 import ru.eriknas.brokenstore.models.entities.Error;
 import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
-import ru.eriknas.brokenstore.services.TShirtsService;
+import ru.eriknas.brokenstore.services.TShirtService;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/tShirt")
-public class TShirtsController {
+@RequestMapping("/t-shirt")
+public class TShirtController {
 
-    private final TShirtsService tShirtsService;
+    private final TShirtService tShirtsService;
 
     @Autowired
-    public TShirtsController(TShirtsService tShirtsService) {
+    public TShirtController(TShirtService tShirtsService) {
         this.tShirtsService = tShirtsService;
     }
 
-    @PostMapping("/new")
+    @PostMapping
     @ApiResponse(responseCode = "201 Created", description = "Создана новая футболка")
     @ApiResponse(
-            responseCode = "400 Bad Request",
+            responseCode = "400 BadRequest",
             description = "Ошибка валидации",
-            content = @Content(schema = @Schema(implementation = Error.class)))
+            content = @Content(schema = @Schema(implementation = Error.class))
+    )
     @SecurityRequirements
     public ResponseEntity<TShirtsDTO> createTShirt(@RequestBody @Validated TShirtsDTO dto) {
         TShirtsEntity created = tShirtsService.createTShirt(dto);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(TShirtsMapper.toDto(created));
+        return new ResponseEntity<>(TShirtsMapper.toDto(created), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -52,18 +51,21 @@ public class TShirtsController {
             description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена", content = @Content)
-    public ResponseEntity<TShirtsEntity> updateTShirt(@PathVariable Integer id, @RequestBody TShirtsDTO dto) {
+    public ResponseEntity<TShirtsEntity> updateTShirt(@PathVariable
+                                                      @Validated
+                                                      @Parameter(description = "id футболки") Integer id,
+                                                      @RequestBody TShirtsDTO dto) {
         TShirtsEntity updated = tShirtsService.updateTShirt(id, dto);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    @ApiResponse(responseCode = "204 No Content", description = "Футболка удалена")
+    @ApiResponse(responseCode = "204 NoContent", description = "Футболка удалена")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена", content = @Content)
-    public ResponseEntity<Void> deleteTShirt(@PathVariable Integer id) {
-        if (tShirtsService.existsById(id)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Void> deleteTShirt(@PathVariable
+                                             @Validated
+                                             @Parameter(description = "id футболки") Integer id) {
+        tShirtsService.getTShirtById(id);
         tShirtsService.deleteTShirt(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -71,11 +73,9 @@ public class TShirtsController {
     @GetMapping("/{id}")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена", content = @Content)
-    public ResponseEntity<TShirtsEntity> getTShirtById(@PathVariable Integer id) {
-        if (tShirtsService.existsById(id)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
+    public ResponseEntity<TShirtsEntity> getTShirtById(@PathVariable
+                                                       @Validated
+                                                       @Parameter(description = "id футболки") Integer id) {
         TShirtsEntity dto = tShirtsService.getTShirtById(id);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
