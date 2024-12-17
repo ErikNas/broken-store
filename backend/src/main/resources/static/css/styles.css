@@ -1,0 +1,36 @@
+body {
+    font-family: Comic Sans MS, Comic Sans, cursive;
+}
+
+a {
+    font-size: 40px;
+    text-decoration: none; /* Убирает подчеркивание */
+    display: block; /* Делает элемент блочным, чтобы можно было использовать margin */
+    text-align: center;  /* Центрирует текст внутри элемента */
+    margin: 0 auto;  /* Центрирует сам элемент, если у него задана ширина */
+}
+
+.header {
+    font-family: Comic Sans MS, Comic Sans, cursive;
+    background-color: #2F4F4F; /* Цвет фона блока */
+    color: white; /* Цвет текста */
+    text-align: center; /* Выравнивание текста по центру */
+    padding: 30px; /* Отступы внутри блока */
+    }
+
+.header h1 {
+    margin: 0; /* Убирает отступы у заголовка */
+    font-size: 50px
+    }
+
+a.swagger {
+    color: #228B22;
+}
+
+a.prometheus {
+    color: #696969;
+}
+
+a.grafana {
+    color: #FF8C00;
+}

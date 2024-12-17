@@ -7,29 +7,34 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 //@Entity
 //@Table(name = "users")
 @Data
+@Builder
 @AllArgsConstructor
 @Schema(description = "Пользователь")
 public class UserDTO {
 
-//    @Id
+    //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Integer id;
+    @Schema(hidden = true)
+    private Integer id;
 
-//    @Column
+    //    @Column
+    @Schema(description = "Имя пользователя")
+    @NotBlank
     private String name;
 
-//    @Column
+    //    @Column
     @Schema(description = "Электронная почта", example = "junior@example.com")
     @Email
     @NotBlank
     private String email;
 
-//    @Column
+    //    @Column
     @Schema(description = "Пароль должен содержать от 8 до 32 символов," +
             "как минимум одну букву, одну цифру и один специальный символ")
     @Size(min = 8, max = 32)
