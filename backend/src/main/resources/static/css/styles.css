@@ -3,10 +3,11 @@ body {
 }
 
 a {
-    font-size: 30px;
+    font-size: 40px;
     text-decoration: none; /* Убирает подчеркивание */
-    padding: 10px 1200px; /* Отступы для кнопки */
-    text-align: center;
+    display: block; /* Делает элемент блочным, чтобы можно было использовать margin */
+    text-align: center;  /* Центрирует текст внутри элемента */
+    margin: 0 auto;  /* Центрирует сам элемент, если у него задана ширина */
 }
 
 .header {
