@@ -2,6 +2,7 @@ package ru.eriknas.brokenstore.dto.store;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,11 +17,10 @@ public class NewsDTO {
     private int id;
 
     @Schema(description = "Название новости")
-    @NotBlank
+    @NotNull(message = "Укажите название новости")
     private String header;
 
     @Schema(description = "Содержимое статьи")
-    @NotBlank
+    @NotNull(message = "Укажите содержимое статьи")
     private String description;
-
 }
