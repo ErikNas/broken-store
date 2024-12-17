@@ -17,9 +17,9 @@ public class NewsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column
+    @Column(name = "header")
     private String header;
 
-    @Column
+    @Column(name = "description")
     private String description;
 }

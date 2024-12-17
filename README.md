@@ -6,7 +6,47 @@
 Идеально подходит для целей ручного, автоматизированного и нагрузочного тестирования в качестве платформы 
 для экспериментов и проведения обучения. 
 
-## Управление приложением в докере
+## Управление приложением в Docker
+
+### Установка Docker
+<details>
+
+<summary>Docker для Windows</summary>
+
+Для скачивания Docker на Windows необходимо выполнить команду в PowerShell от имени администратора
+```Bash
+Invoke-WebRequest -Uri https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe -OutFile DockerDesktopInstaller.exe
+```
+
+Для установки Docker на Windows необходимо выполнить команду в PowerShell от имени администратора
+```Bash
+Start-Process -Wait -FilePath .\DockerDesktopInstaller.exe
+```
+
+**Важно**: в процессе установки снять флажок с чекбокса «**Use WSL 2 instead of Hyper-V (recommended)**»
+
+Результат успешной установки Docker:
+```Bash
+Docker Desktop 4.36.0
+Installation succeeded
+```
+
+Для запуска Docker на Windows необходимо выполнить команду в PowerShell от имени администратора
+```Bash
+Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
+```
+
+Принять соглашение и авторизоваться в Docker.
+
+</details>
+
+<details><summary>Docker для Mac</summary>
+Скоро...
+</details>
+
+<details><summary>Docker для Linux</summary>
+Скоро...
+</details>
 
 ### Запуск приложения
 
@@ -36,7 +76,7 @@ docker compose up -d
 
 - *grafana* - контейнер с графаной, которая позволяет просматривать собранные метрики на красивых графиках
 При поднятии контейнера datasource с prometheus добавляется автоматически. Дашборды для графиков необходимо добавить вручную
-(дашборды сохранены в grafana/dashboards)
+(дашборды сохранены в grafana/dashboards). Доступен по адресу http://127.0.0.1:3000
 
 ### Остановка приложения
 
@@ -44,6 +84,11 @@ docker compose up -d
 ```Bash
 docker compose stop
 ```
+
+### Запуск контейнера в докере на Windows
+
+Перейти в Docker Desktop и запустить вручную контейнер с приложением.
+
 
 ### Полное удаление приложения
 
