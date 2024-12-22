@@ -1,6 +1,6 @@
 services:
   client-backend:
-    image: client:0.0.7
+    image: client:0.0.8
     container_name: broken-store-client-backend
     build:
       context: .
