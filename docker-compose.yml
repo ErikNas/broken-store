@@ -1,10 +1,10 @@
 services:
   client-backend:
-    image: client:0.0.6
+    image: client:0.0.7
     container_name: broken-store-client-backend
     build:
       context: .
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./backend.dockerfile
     ports:
       - "8085:8080"
     depends_on:
@@ -12,8 +12,8 @@ services:
     environment:
       - SERVER_PORT=8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/broken_store
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-spring_admin}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-spring_admin}
       #      - SPRING_JPA_DATABASE=postgresql
       #      - SPRING_JPA_HIBERNATE_DDL-AUTO=update
       # - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring boot-ddl-auto-generator
@@ -31,8 +31,8 @@ services:
     image: postgres:14.7-alpine
     container_name: broken-store-postgres-db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: ${POSTGRES_USER:-pg_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_admin}
       POSTGRES_DB: broken_store
     ports:
       - "15432:5432"
@@ -63,7 +63,6 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.48.1
-    # container_name: prometheus
     container_name: broken-store-prometheus
     restart: unless-stopped
     volumes:
@@ -71,7 +70,7 @@ services:
     ports:
       - "9090:9090"
     healthcheck:
-      test: [ "CMD", "nc", "-z", "localhost", "9090" ]
+      test: ["CMD", "nc", "-z", "localhost", "9090"]
     deploy:
       resources:
         limits:
@@ -83,7 +82,6 @@ services:
 
   grafana:
     image: grafana/grafana:9.5.15
-    # container_name: grafana
     container_name: broken-store-grafana
     restart: unless-stopped
     ports:
@@ -95,7 +93,7 @@ services:
     depends_on:
       - prometheus
     healthcheck:
-      test: [ "CMD", "nc", "-z", "localhost", "3000" ]
+      test: ["CMD", "nc", "-z", "localhost", "3000"]
     deploy:
       resources:
         limits:
@@ -107,7 +105,6 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
-    # container_name: cadvisor-exporter
     container_name: broken-store-cadvisor-exporter
     privileged: true
     ports:
@@ -115,11 +112,11 @@ services:
     volumes:
       - /:/rootfs:ro
       #      - /var/run:/var/run:rw
-      - /var/run/docker.sock:/var/run/docker.sock:rw  # mac
+      - /var/run/docker.sock:/var/run/docker.sock:rw # mac
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     command:
-      - '-port=8081'
+      - "-port=8081"
     depends_on:
       - client-backend
     deploy:
@@ -128,6 +125,26 @@ services:
           cpus: "0.5"
           memory: 512M
 
+  minio:
+    image: minio/minio:latest
+    container_name: broken-store-minio
+    restart: unless-stopped
+    command: server --console-address ":9001" /data/
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio_admin}
+    volumes:
+      - minio-data:/data
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    #   interval: 30s
+    #   timeout: 20s
+    #   retries: 3
+
 volumes:
   db-data:
+  minio-data:
 #  pgadmin-data:
