@@ -34,3 +34,7 @@ a.prometheus {
 a.grafana {
     color: #FF8C00;
 }
+
+a.minio {
+    color: #B22222;
+}
