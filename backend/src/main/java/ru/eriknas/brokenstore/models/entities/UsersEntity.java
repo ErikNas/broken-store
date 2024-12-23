@@ -17,12 +17,12 @@ public class UsersEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column
+    @Column (name = "name")
     private String name;
 
-    @Column
+    @Column (name = "email")
     private String email;
 
-    @Column
+    @Column (name = "password")
     private String password;
 }
