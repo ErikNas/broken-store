@@ -1,4 +1,4 @@
-package ru.eriknas.brokenstore.dto.store;
+package ru.eriknas.brokenstore.dto.store.tshirts;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -7,16 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
-
 @Data
 @Builder
 @AllArgsConstructor
-@Schema(description = "Футболки")
-public class TShirtsDTO {
-
-    @Schema(hidden = true)
-    private Integer id;
+@Schema(description = "Обновление футболки")
+public class TShirtUpdateDTO {
 
     @Schema(description = "Артикул футболки")
     @NotNull(message = "Укажите артикул футболки")
@@ -52,13 +47,4 @@ public class TShirtsDTO {
     @NotNull(message = "Укажите цену футболки")
     @Min(value = 0, message = "Цена не может быть отрицательная")
     private Double price;
-
-    @Schema(description = "Дата/время удаления записи")
-    private OffsetDateTime archivedAt;
-
-    @Schema(description = "Дата/время создания записи")
-    private OffsetDateTime createdAt;
-
-    @Schema(description = "Дата/время обновления записи")
-    private OffsetDateTime updatedAt;
 }

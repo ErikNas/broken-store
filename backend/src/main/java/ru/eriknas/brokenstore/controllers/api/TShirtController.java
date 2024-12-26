@@ -6,16 +6,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
-import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.eriknas.brokenstore.dto.store.TShirtsDTO;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtCreateDTO;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtUpdateDTO;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtsInfoDTO;
+import ru.eriknas.brokenstore.entity.TShirtsEntity;
 import ru.eriknas.brokenstore.mappers.TShirtsMapper;
-import ru.eriknas.brokenstore.models.entities.Error;
-import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
+import ru.eriknas.brokenstore.model.Error;
 import ru.eriknas.brokenstore.services.TShirtService;
 
 import java.util.Collection;
@@ -38,13 +39,13 @@ public class TShirtController {
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
-    public ResponseEntity<TShirtsDTO> createTShirt(@RequestBody @Validated TShirtsDTO dto) {
-        TShirtsEntity created = tShirtsService.createTShirt(dto);
-        return new ResponseEntity<>(TShirtsMapper.toDto(created), HttpStatus.CREATED);
+    public ResponseEntity<TShirtsInfoDTO> createTShirt(@RequestBody @Validated TShirtCreateDTO dto) {
+
+        return new ResponseEntity<>(tShirtsService.createTShirt(dto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Изменить футболку")
+    @Operation(summary = "Редактировать футболку")
     @ApiResponse(responseCode = "200 OK", description = "Изменения внесены")
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
@@ -52,8 +53,8 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<TShirtsEntity> updateTShirt(@PathVariable
                                                       @Validated
-                                                      @Parameter(description = "id футболки") int id,
-                                                      @RequestBody TShirtsDTO dto) {
+                                                      @Parameter(description = "id футболки") String id,
+                                                      @RequestBody TShirtUpdateDTO dto) {
         TShirtsEntity updated = tShirtsService.updateTShirt(id, dto);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
@@ -65,8 +66,7 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<Void> deleteTShirt(@PathVariable
                                              @Validated
-                                             @Parameter(description = "id футболки") int id) {
-        tShirtsService.getTShirtById(id);
+                                             @Parameter(description = "id футболки") String id) {
         tShirtsService.deleteTShirt(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -78,7 +78,7 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<TShirtsEntity> getTShirtById(@PathVariable
                                                        @Validated
-                                                       @Parameter(description = "id футболки") int id) {
+                                                       @Parameter(description = "id футболки") String id) {
         TShirtsEntity dto = tShirtsService.getTShirtById(id);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -86,12 +86,10 @@ public class TShirtController {
     @GetMapping("/all")
     @Operation(summary = "Получить список всех футболок")
     @ApiResponse(responseCode = "200 OK")
-    public Collection<TShirtsDTO> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
-                                                @Parameter(description = "min: 0")
-                                                @Validated @Min(0) int page,
-                                                @RequestParam(required = false, defaultValue = "10")
-                                                @Parameter(description = "min: 1")
-                                                @Validated @Min(1) int size) {
+    public Collection<TShirtsInfoDTO> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
+                                                    @Parameter(description = "min: 0") int page,
+                                                    @RequestParam(required = false, defaultValue = "10")
+                                                    @Parameter(description = "min: 1") int size) {
         return tShirtsService.getAllTShirts(page, size)
                 .get()
                 .map(TShirtsMapper::toDto)

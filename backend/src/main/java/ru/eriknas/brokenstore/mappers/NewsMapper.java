@@ -1,7 +1,7 @@
 package ru.eriknas.brokenstore.mappers;
 
 import ru.eriknas.brokenstore.dto.store.NewsDTO;
-import ru.eriknas.brokenstore.models.entities.NewsEntity;
+import ru.eriknas.brokenstore.entity.NewsEntity;
 
 public class NewsMapper {
 

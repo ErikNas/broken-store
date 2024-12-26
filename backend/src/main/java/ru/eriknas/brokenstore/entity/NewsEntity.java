@@ -1,4 +1,4 @@
-package ru.eriknas.brokenstore.models.entities;
+package ru.eriknas.brokenstore.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,18 +11,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
-public class UsersEntity {
+@Table(name = "news")
+public class NewsEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column
-    private String name;
+    @Column(name = "header")
+    private String header;
 
-    @Column
-    private String email;
-
-    @Column
-    private String password;
+    @Column(name = "description")
+    private String description;
 }

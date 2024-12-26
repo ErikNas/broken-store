@@ -1,7 +1,7 @@
 package ru.eriknas.brokenstore.mappers;
 
 import ru.eriknas.brokenstore.dto.users.UserDTO;
-import ru.eriknas.brokenstore.models.entities.UsersEntity;
+import ru.eriknas.brokenstore.entity.UsersEntity;
 
 public class UsersMapper {
 

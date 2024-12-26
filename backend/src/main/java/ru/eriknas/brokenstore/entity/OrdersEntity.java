@@ -1,4 +1,4 @@
-package ru.eriknas.brokenstore.models.entities;
+package ru.eriknas.brokenstore.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,46 +6,45 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "t_shirt", uniqueConstraints = @UniqueConstraint(columnNames = "article"))
-public class TShirtsEntity {
+@Table(name = "orders")
+public class OrdersEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "article", unique = true)
-    private String article;
+    @Column(name = "user_id", insertable = false, updatable = false)
+    private Integer userId;
 
-    @Column(name = "name")
-    private String name;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TShirtOrdersEntity> tShirtOrders;
 
-    @Column(name = "size")
-    private String size;
+    @Column(name = "sum_order")
+    private Double sumOrder;
 
-    @Column(name = "color")
-    private String color;
+    @Column(name = "data_order")
+    private LocalDate dataOrder;
 
-    @Column(name = "image")
-    private String image;
+    @Column(name = "data_delivery")
+    private LocalDate dataDelivery;
 
-    @Column(name = "material")
-    private String material;
+    @Column(name = "status_order")
+    private String statusOrder;
 
-    @Column(name = "country_of_production")
-    private String countryOfProduction;
+    @Column(name = "data_return")
+    private OffsetDateTime dataReturn;
 
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "price")
-    private Double price;
+    @Column(name = "reason_for_return")
+    private String reasonForReturn;
 
     @Column(name = "archived_at")
     private OffsetDateTime archivedAt;

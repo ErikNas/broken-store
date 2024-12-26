@@ -14,8 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.store.NewsDTO;
 import ru.eriknas.brokenstore.mappers.NewsMapper;
-import ru.eriknas.brokenstore.models.entities.Error;
-import ru.eriknas.brokenstore.models.entities.NewsEntity;
+import ru.eriknas.brokenstore.entity.NewsEntity;
 import ru.eriknas.brokenstore.services.NewsService;
 
 import java.util.Collection;
@@ -36,7 +35,7 @@ public class NewsController {
     @Operation(summary = "Добавить новость")
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
-            content = @Content(schema = @Schema(implementation = Error.class)))
+            content = @Content(schema = @Schema(implementation = ru.eriknas.brokenstore.model.Error.class)))
     @SecurityRequirements
     public ResponseEntity<NewsDTO> addNews(@RequestBody @Validated NewsDTO newsDTO) {
         NewsEntity newsEntity = newsService.addNews(newsDTO);

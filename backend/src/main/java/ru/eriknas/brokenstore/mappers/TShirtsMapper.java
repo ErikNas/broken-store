@@ -1,12 +1,13 @@
 package ru.eriknas.brokenstore.mappers;
 
-import ru.eriknas.brokenstore.dto.store.TShirtsDTO;
-import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtCreateDTO;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtsInfoDTO;
+import ru.eriknas.brokenstore.entity.TShirtsEntity;
 
 public class TShirtsMapper {
 
-    public static TShirtsDTO toDto(TShirtsEntity entity) {
-        return TShirtsDTO.builder()
+    public static TShirtsInfoDTO toDto(TShirtsEntity entity) {
+        return TShirtsInfoDTO.builder()
                 .id(entity.getId())
                 .article(entity.getArticle())
                 .name(entity.getName())
@@ -17,13 +18,13 @@ public class TShirtsMapper {
                 .countryOfProduction(entity.getCountryOfProduction())
                 .description(entity.getDescription())
                 .price(entity.getPrice())
-                .archivedAt(entity.getArchivedAt())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .archivedAt(entity.getArchivedAt() != null ? entity.getArchivedAt().toLocalDate() : null)
+                .createdAt(entity.getCreatedAt() != null ? entity.getCreatedAt().toLocalDate() : null)
+                .updatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt().toLocalDate() : null)
                 .build();
     }
 
-    public static TShirtsEntity toEntity(TShirtsDTO dto) {
+    public static TShirtsEntity toEntity(TShirtCreateDTO dto) {
         return TShirtsEntity.builder()
                 .article(dto.getArticle())
                 .name(dto.getName())

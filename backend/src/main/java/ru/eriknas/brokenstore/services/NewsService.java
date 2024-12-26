@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.eriknas.brokenstore.dto.store.NewsDTO;
 import ru.eriknas.brokenstore.exception.NotFoundException;
 import ru.eriknas.brokenstore.mappers.NewsMapper;
-import ru.eriknas.brokenstore.models.entities.NewsEntity;
+import ru.eriknas.brokenstore.entity.NewsEntity;
 import ru.eriknas.brokenstore.repository.NewsRepository;
 
 @Service
