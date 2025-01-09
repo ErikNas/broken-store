@@ -4,10 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.eriknas.brokenstore.dto.store.orders.OrderCreateDTO;
+import ru.eriknas.brokenstore.dto.store.orders.OrderDTO;
 import ru.eriknas.brokenstore.dto.store.orders.OrderInfoDTO;
 import ru.eriknas.brokenstore.dto.store.orders.TShirtOrderDTO;
 import ru.eriknas.brokenstore.entity.OrdersEntity;
+import ru.eriknas.brokenstore.entity.TShirtOrdersEntity;
 import ru.eriknas.brokenstore.entity.TShirtsEntity;
 import ru.eriknas.brokenstore.exception.InvalidPageSizeException;
 import ru.eriknas.brokenstore.exception.NotFoundException;
@@ -18,6 +19,8 @@ import ru.eriknas.brokenstore.repository.TShirtsRepository;
 import ru.eriknas.brokenstore.repository.UsersRepository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.eriknas.brokenstore.common.Constants.*;
 
@@ -28,10 +31,6 @@ public class OrdersService {
     private final TShirtsRepository tShirtsRepository;
     private final UsersRepository usersRepository;
 
-    private static final String ORDER_NOT_FOUND = "Заказ с id=%s не найден";
-    private static final String TSHIRT_NOT_FOUND = "Футболка с id=%s не найдена";
-    private static final String USER_NOT_FOUND = "Пользователь с id=%s не найден";
-
     @Autowired
     public OrdersService(OrdersRepository repository, TShirtsRepository tShirtsRepository, UsersRepository usersRepository) {
         this.ordersRepository = repository;
@@ -39,36 +38,76 @@ public class OrdersService {
         this.usersRepository = usersRepository;
     }
 
-    public OrderInfoDTO createOrder(OrderCreateDTO dto) {
-        if (!usersRepository.existsById(dto.getUserId())) {
-            throw new NotFoundException(String.format(USER_NOT_FOUND, dto.getUserId()));
+    // Метод валидации пользователя
+    private void validateUserExists(int userId) {
+        if (!usersRepository.existsById(userId)) {
+            throw new NotFoundException(String.format(USER_NOT_FOUND, userId));
         }
+    }
 
-        double totalSum = 0;
+    // Метод расчета общей суммы и преобразования списка заказанных футболок в сущности
+    private List<TShirtOrdersEntity> createTShirtOrders(OrdersEntity order, List<TShirtOrderDTO> tShirtOrders) {
+        return tShirtOrders.stream()
+                .map(tShirtOrder -> {
+                    TShirtsEntity tShirtsEntity = tShirtsRepository.findById(tShirtOrder.getTShirtId())
+                            .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, tShirtOrder.getTShirtId())));
 
-        for (TShirtOrderDTO tShirtOrder : dto.getTShirtOrders()) {
-            Integer tShirtId = tShirtOrder.getTShirtId();
-            if (!tShirtsRepository.existsById(tShirtId)) {
-                throw new NotFoundException(String.format(TSHIRT_NOT_FOUND, tShirtId));
-            }
+                    Integer count = tShirtOrder.getCount();
 
-            TShirtsEntity tShirtsEntity = tShirtsRepository.findById(tShirtId)
-                    .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, tShirtId)));
+                    if (count == null || count < 0) {
+                        throw new ValidationException("Количество футболок должно быть ⩾ 0");
+                    }
 
-            totalSum += tShirtsEntity.getPrice() * tShirtOrder.getCount();
-        }
+                    TShirtOrdersEntity tShirtOrdersEntity = new TShirtOrdersEntity();
+                    tShirtOrdersEntity.setOrder(order);
+                    tShirtOrdersEntity.setCount(count);
+                    tShirtOrdersEntity.setTShirt(tShirtsEntity);
 
-        var orderEntity = OrdersMapper.toEntity(dto, tShirtsRepository);
-        var nowDate = OffsetDateTime.now();
+                    return tShirtOrdersEntity;
+                })
+                .collect(Collectors.toList());
+    }
 
-        orderEntity.setStatusOrder("Создан");
-        orderEntity.setSumOrder(totalSum);
-        orderEntity.setCreatedAt(nowDate);
-        orderEntity.setDataOrder(nowDate.toLocalDate());
 
-        ordersRepository.save(orderEntity);
+    public OrderInfoDTO createOrder(OrderDTO dto) {
+        validateUserExists(dto.getUserId());
 
-        return OrdersMapper.toDTO(orderEntity);
+        // Создаем сущность заказа
+        OrdersEntity order = OrdersMapper.toEntity(dto, tShirtsRepository);
+
+        List<TShirtOrdersEntity> tShirtOrders = createTShirtOrders(order, dto.getTShirtOrders());
+
+        double totalSum = tShirtOrders.stream()
+                .mapToDouble(t -> t.getTShirt().getPrice() * t.getCount())
+                .sum();
+
+        order.setStatusOrder("Создан");
+        order.setSumOrder(totalSum);
+        order.setDataOrder(OffsetDateTime.now().toLocalDate());
+        order.setCreatedAt(OffsetDateTime.now());
+
+        return OrdersMapper.toDTO(ordersRepository.save(order));
+    }
+
+    public OrderInfoDTO updateOrder(String id, OrderDTO dto) {
+        validateUserExists(dto.getUserId());
+
+        OrdersEntity order = findOrderById(parseId(id));
+
+        List<TShirtOrdersEntity> tShirtOrders = createTShirtOrders(order, dto.getTShirtOrders());
+
+        double totalSum = tShirtOrders.stream()
+                .mapToDouble(t -> t.getTShirt().getPrice() * t.getCount())
+                .sum();
+
+        // Обновляем поля сущности заказа
+        order.getTShirtOrders().clear();
+        order.getTShirtOrders().addAll(tShirtOrders);
+        order.setSumOrder(totalSum);
+        order.setDataDelivery(dto.getDataDelivery());
+        order.setUpdatedAt(OffsetDateTime.now());
+
+        return OrdersMapper.toDTO(ordersRepository.save(order));
     }
 
     public OrdersEntity getOrderById(String id) {
@@ -82,7 +121,6 @@ public class OrdersService {
     }
 
     public Page<OrdersEntity> getAllOrders(int page, int size) {
-
         if (page < 0) {
             throw new InvalidPageSizeException(INVALID_PAGE);
         }
@@ -94,7 +132,6 @@ public class OrdersService {
     }
 
     private int parseId(String id) {
-
         try {
             return Integer.parseInt(id);
         } catch (NumberFormatException ex) {
@@ -103,7 +140,6 @@ public class OrdersService {
     }
 
     private OrdersEntity findOrderById(int id) {
-
         return ordersRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format(ORDER_NOT_FOUND, id)));
     }

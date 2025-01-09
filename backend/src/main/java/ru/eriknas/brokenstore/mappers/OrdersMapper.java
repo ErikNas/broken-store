@@ -1,17 +1,18 @@
 package ru.eriknas.brokenstore.mappers;
 
-import jakarta.persistence.EntityNotFoundException;
-import ru.eriknas.brokenstore.dto.store.orders.OrderCreateDTO;
+import ru.eriknas.brokenstore.dto.store.orders.OrderDTO;
 import ru.eriknas.brokenstore.dto.store.orders.OrderInfoDTO;
 import ru.eriknas.brokenstore.dto.store.orders.TShirtOrderDTO;
 import ru.eriknas.brokenstore.entity.OrdersEntity;
 import ru.eriknas.brokenstore.entity.TShirtOrdersEntity;
 import ru.eriknas.brokenstore.entity.TShirtsEntity;
+import ru.eriknas.brokenstore.exception.NotFoundException;
 import ru.eriknas.brokenstore.repository.TShirtsRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.eriknas.brokenstore.common.Constants.TSHIRT_NOT_FOUND;
 
 public class OrdersMapper {
 
@@ -39,30 +40,29 @@ public class OrdersMapper {
                 .build();
     }
 
-    public static OrdersEntity toEntity(OrderCreateDTO dto, TShirtsRepository tShirtRepository) {
-
+    public static OrdersEntity toEntity(OrderDTO dto, TShirtsRepository tShirtRepository) {
         OrdersEntity entity = OrdersEntity.builder()
                 .userId(dto.getUserId())
                 .dataDelivery(dto.getDataDelivery())
-                .tShirtOrders(new ArrayList<>())
                 .build();
 
         List<TShirtOrdersEntity> tShirtOrderEntities = dto.getTShirtOrders().stream()
                 .map(tShirtOrderDTO -> {
-                    TShirtOrdersEntity tShirtEntity = new TShirtOrdersEntity();
+                    int tShirtId = tShirtOrderDTO.getTShirtId();
 
-                    TShirtsEntity tShirt = tShirtRepository.findById(tShirtOrderDTO.getTShirtId())
-                            .orElseThrow(EntityNotFoundException::new);
+                    TShirtsEntity tShirt = tShirtRepository.findById(tShirtId)
+                            .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, tShirtId)));
 
-                    tShirtEntity.setTShirt(tShirt);
-                    tShirtEntity.setCount(tShirtOrderDTO.getCount());
-                    tShirtEntity.setOrder(entity);
-
-                    return tShirtEntity;
+                    return TShirtOrdersEntity.builder()
+                            .tShirt(tShirt)
+                            .count(tShirtOrderDTO.getCount())
+                            .order(entity)
+                            .build();
                 })
                 .collect(Collectors.toList());
 
         entity.setTShirtOrders(tShirtOrderEntities);
+
         return entity;
     }
 }

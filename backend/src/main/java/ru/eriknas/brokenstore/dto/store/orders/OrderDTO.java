@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @Schema(description = "Создание заказа")
-public class OrderCreateDTO {
+public class OrderDTO {
 
     @Schema(hidden = true)
     private Integer id;

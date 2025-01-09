@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.eriknas.brokenstore.dto.store.orders.OrderCreateDTO;
+import ru.eriknas.brokenstore.dto.store.orders.OrderDTO;
 import ru.eriknas.brokenstore.dto.store.orders.OrderInfoDTO;
 import ru.eriknas.brokenstore.entity.OrdersEntity;
 import ru.eriknas.brokenstore.mappers.OrdersMapper;
@@ -38,9 +38,22 @@ public class OrderController {
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
-    public ResponseEntity<OrderInfoDTO> createOrder(@RequestBody @Validated OrderCreateDTO dto) {
+    public ResponseEntity<OrderInfoDTO> createOrder(@RequestBody @Validated OrderDTO dto) {
+        OrderInfoDTO orderInfo = ordersService.createOrder(dto);
+        return new ResponseEntity<>(orderInfo, HttpStatus.CREATED);
+    }
 
-        return new ResponseEntity<>(ordersService.createOrder(dto), HttpStatus.CREATED);
+    @PutMapping("/{id}")
+    @Operation(summary = "Редактировать заказ")
+    @ApiResponse(responseCode = "200 OK")
+    @ApiResponse(responseCode = "404 NotFound", description = "Заказ не найден",
+            content = @Content(schema = @Schema(implementation = Error.class)))
+    public ResponseEntity<OrderInfoDTO> editOrder(@PathVariable
+                                                  @Validated
+                                                  @Parameter(description = "id заказа") String id,
+                                                  @RequestBody @Validated OrderDTO dto) {
+        OrderInfoDTO orderInfo = ordersService.updateOrder(id, dto);
+        return new ResponseEntity<>(orderInfo, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

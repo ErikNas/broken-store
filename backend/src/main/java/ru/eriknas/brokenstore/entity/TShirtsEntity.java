@@ -50,20 +50,9 @@ public class TShirtsEntity {
     @Column(name = "archived_at")
     private OffsetDateTime archivedAt;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
-
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = OffsetDateTime.now();
-        this.updatedAt = OffsetDateTime.now();
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        this.updatedAt = OffsetDateTime.now();
-    }
 }
