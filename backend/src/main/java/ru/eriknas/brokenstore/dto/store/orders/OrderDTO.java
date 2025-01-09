@@ -23,7 +23,7 @@ public class OrderDTO {
     private Integer userId;
 
     @Schema(description = "Список заказанных футболок с указанием количества")
-    @NotNull(message = "Укажите футболки и их количество")
+    @NotNull(message = "Укажите id футболки и количество")
     private List<TShirtOrderDTO> tShirtOrders;
 
     @Schema(description = "Дата доставки заказа")

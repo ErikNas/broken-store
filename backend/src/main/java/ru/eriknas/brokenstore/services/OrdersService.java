@@ -45,18 +45,23 @@ public class OrdersService {
         }
     }
 
-    // Метод расчета общей суммы и преобразования списка заказанных футболок в сущности
+    // Метод преобразования списка заказанных футболок в сущности
     private List<TShirtOrdersEntity> createTShirtOrders(OrdersEntity order, List<TShirtOrderDTO> tShirtOrders) {
         return tShirtOrders.stream()
                 .map(tShirtOrder -> {
-                    TShirtsEntity tShirtsEntity = tShirtsRepository.findById(tShirtOrder.getTShirtId())
-                            .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, tShirtOrder.getTShirtId())));
-
+                    Integer tShirtId = tShirtOrder.getTShirtId();
                     Integer count = tShirtOrder.getCount();
 
-                    if (count == null || count < 0) {
+                    // Проверка на количество футболок
+                    if (count == null) {
+                        throw new ValidationException("Необходимо указать количество футболок");
+                    }
+                    if (count < 0) {
                         throw new ValidationException("Количество футболок должно быть ⩾ 0");
                     }
+
+                    TShirtsEntity tShirtsEntity = tShirtsRepository.findById(tShirtId)
+                            .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, tShirtId)));
 
                     TShirtOrdersEntity tShirtOrdersEntity = new TShirtOrdersEntity();
                     tShirtOrdersEntity.setOrder(order);
@@ -67,7 +72,6 @@ public class OrdersService {
                 })
                 .collect(Collectors.toList());
     }
-
 
     public OrderInfoDTO createOrder(OrderDTO dto) {
         validateUserExists(dto.getUserId());
@@ -92,6 +96,7 @@ public class OrdersService {
     public OrderInfoDTO updateOrder(String id, OrderDTO dto) {
         validateUserExists(dto.getUserId());
 
+        // Ищем заказ по id
         OrdersEntity order = findOrderById(parseId(id));
 
         List<TShirtOrdersEntity> tShirtOrders = createTShirtOrders(order, dto.getTShirtOrders());
@@ -103,6 +108,7 @@ public class OrdersService {
         // Обновляем поля сущности заказа
         order.getTShirtOrders().clear();
         order.getTShirtOrders().addAll(tShirtOrders);
+        order.setStatusOrder("Обновлен");
         order.setSumOrder(totalSum);
         order.setDataDelivery(dto.getDataDelivery());
         order.setUpdatedAt(OffsetDateTime.now());

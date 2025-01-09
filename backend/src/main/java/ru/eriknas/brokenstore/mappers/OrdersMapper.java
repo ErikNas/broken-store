@@ -7,11 +7,14 @@ import ru.eriknas.brokenstore.entity.OrdersEntity;
 import ru.eriknas.brokenstore.entity.TShirtOrdersEntity;
 import ru.eriknas.brokenstore.entity.TShirtsEntity;
 import ru.eriknas.brokenstore.exception.NotFoundException;
+import ru.eriknas.brokenstore.exception.ValidationException;
 import ru.eriknas.brokenstore.repository.TShirtsRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ru.eriknas.brokenstore.common.Constants.TSHIRT_ID_REQUIRED;
 import static ru.eriknas.brokenstore.common.Constants.TSHIRT_NOT_FOUND;
 
 public class OrdersMapper {
@@ -48,7 +51,8 @@ public class OrdersMapper {
 
         List<TShirtOrdersEntity> tShirtOrderEntities = dto.getTShirtOrders().stream()
                 .map(tShirtOrderDTO -> {
-                    int tShirtId = tShirtOrderDTO.getTShirtId();
+                    Integer tShirtId = Optional.ofNullable(tShirtOrderDTO.getTShirtId())
+                            .orElseThrow(() -> new ValidationException(TSHIRT_ID_REQUIRED));
 
                     TShirtsEntity tShirt = tShirtRepository.findById(tShirtId)
                             .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, tShirtId)));
