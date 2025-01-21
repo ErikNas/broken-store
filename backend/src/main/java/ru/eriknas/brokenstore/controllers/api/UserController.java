@@ -2,28 +2,29 @@ package ru.eriknas.brokenstore.controllers.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
 import ru.eriknas.brokenstore.mappers.UsersMapper;
+import ru.eriknas.brokenstore.models.entities.Error;
 import ru.eriknas.brokenstore.models.entities.UsersEntity;
 import ru.eriknas.brokenstore.services.UsersService;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
-//дефолтный ответ для всех запросов
-@ApiResponses(@ApiResponse(responseCode = "200", useReturnTypeSchema = true))
 public class UserController {
 
     private final UsersService usersService;
@@ -34,37 +35,51 @@ public class UserController {
     }
 
     @PostMapping
-    @SecurityRequirements
     @Operation(summary = "Добавить пользователя")
-    public UserDTO addUser(@RequestBody @Validated UserDTO userDTO) {
-        UsersEntity usersEntity = usersService.addUsers(userDTO);
-        return UsersMapper.toDto(usersEntity);
+    @ApiResponse(responseCode = "201 Created", description = "Пользователь добавлен")
+    @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
+            content = @Content(schema = @Schema(implementation = Error.class)))
+    @SecurityRequirements
+    public ResponseEntity<UserDTO> addUser(@RequestBody @Validated UserDTO dto) {
+        UsersEntity usersEntity = usersService.addUsers(dto);
+        return new ResponseEntity<>(UsersMapper.toDto(usersEntity), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     @SecurityRequirements
     @Operation(summary = "Удалить пользователя")
-    public void deleteUsers(@PathVariable @Validated @Parameter(description = "id пользователя") int id) {
+    @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
+    @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
+            content = @Content(schema = @Schema(implementation = Error.class)))
+    public ResponseEntity<Void> deleteUsers(@PathVariable
+                                @Validated
+                                @Parameter(description = "id пользователя") int id) {
+        usersService.getUsersById(id);
         usersService.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{id}")
-    @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     @Operation(summary = "Найти пользователя по id")
-    public Optional<UserDTO> getUsersById(@PathVariable @Validated @Parameter(description = "id пользователя") int id) {
-        Optional<UsersEntity> users = usersService.getUsersById(id);
-        return users.map(UsersMapper::toDto);
+    @ApiResponse(responseCode = "200 OK")
+    @ApiResponse(responseCode = "404", description = "Пользователь не найден",
+    content = @Content(schema = @Schema(implementation = Error.class)))
+    public ResponseEntity<UsersEntity> getUsersById(@PathVariable
+                                                        @Validated
+                                                        @Parameter(description = "id пользователя") int id) {
+        UsersEntity dto = usersService.getUsersById(id);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @Operation(summary = "Получить список всех сотрудников")
+    @ApiResponse(responseCode = "200 OK")
     public Collection<UserDTO> getAllUsers(@RequestParam(required = false, defaultValue = "0")
-                                           @Parameter(description = "min: 0") //раз
+                                           @Parameter(description = "min: 0")
                                            @Validated @Min(0) int page,
                                            @RequestParam(required = false, defaultValue = "10")
-                                           @Parameter(description = "min: 1") //двас
+                                           @Parameter(description = "min: 1")
                                            @Validated @Min(1) int size) {
-//        return List.of(new UserDTO("retrieved user", "junior@example.com", null));
         return usersService.getAllUsers(page, size)
                 .get()
                 .map(UsersMapper::toDto)

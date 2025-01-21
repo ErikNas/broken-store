@@ -2,44 +2,52 @@ package ru.eriknas.brokenstore.dto.users;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-//@Entity
-//@Table(name = "users")
 @Data
 @Builder
 @AllArgsConstructor
 @Schema(description = "Пользователь")
 public class UserDTO {
 
-    //    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(hidden = true)
     private Integer id;
 
-    //    @Column
-    @Schema(description = "Имя пользователя")
-    @NotBlank
-    private String name;
+    @Schema(description = "Имя пользователя", example = "string")
+    @NotNull(message = "first_name: Не может быть пустым")
+    @Pattern(message = "first_name: Имя пользователя не может содержать спец. символы и должно содержать не более 32 символов",
+            regexp = "^[a-zA-Z]{1,32}$")
+    private String firstName;
 
-    //    @Column
-    @Schema(description = "Электронная почта", example = "junior@example.com")
+    @Schema(description = "Фамилия пользователя", example = "string")
+    @NotNull(message = "last_name: Не может быть пустым")
+    @Pattern(message = "last_name: Фамилия пользователя не может содержать спец. символы и должно содержать не более 32 символов",
+            regexp = "^[a-zA-Z]{1,32}$")
+    private String lastName;
+
+    @Schema(description = "Номер телефона", example = "string")
+    @Pattern(message = "phone: Номер телефона должен начинаться с 7",regexp = "^7\\d{10}$")
+    private String phone;
+
+    @Schema(description = "Адрес проживания пользователя")
+    private String address;
+
+    @Schema(description = "Электронная почта", example = "string")
     @Email
-    @NotBlank
+    @NotNull(message = "email: Не может быть пустым")
+    @Pattern(message = "email: Электронная почта должна состоять из двух частей, разделенных @:" +
+            "левая часть — логин, имя пользователя - это текст, который может содержать буквы (A-Z, a-z) и цифры (0-9)," +
+            " правая часть — доменное имя", regexp = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$")
     private String email;
 
-    //    @Column
-    @Schema(description = "Пароль должен содержать от 8 до 32 символов," +
-            "как минимум одну букву, одну цифру и один специальный символ")
+    @Schema(description = "Пароль", example = "string")
     @Size(min = 8, max = 32)
-    @NotBlank
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?^&])[A-Za-z\\d@$!%*#?^&]{3,}$")
+    @NotNull(message = "password: Не может быть пустым")
+    @Pattern(message = "password: Пароль должен содержать от 8 до 32 символов, как минимум одну букву, одну цифру и" +
+            "один специальный символ", regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?^&])[A-Za-z\\d@$!%*#?^&]{3,}$")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
