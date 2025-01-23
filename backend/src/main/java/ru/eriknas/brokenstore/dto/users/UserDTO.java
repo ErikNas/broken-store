@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -19,13 +21,13 @@ public class UserDTO {
     @Schema(description = "Имя пользователя", example = "string")
     @NotNull(message = "first_name: Не может быть пустым")
     @Pattern(message = "first_name: Имя пользователя не может содержать спец. символы и должно содержать не более 32 символов",
-            regexp = "^[a-zA-Z]{1,32}$")
+            regexp = "^[a-zA-Zа-яА-ЯЁё]{1,32}$") //todo добавить ввод на русском языке
     private String firstName;
 
     @Schema(description = "Фамилия пользователя", example = "string")
     @NotNull(message = "last_name: Не может быть пустым")
     @Pattern(message = "last_name: Фамилия пользователя не может содержать спец. символы и должно содержать не более 32 символов",
-            regexp = "^[a-zA-Z]{1,32}$")
+            regexp = "^[a-zA-Zа-яА-ЯЁё]{1,32}$") //todo добавить ввод на русском языке
     private String lastName;
 
     @Schema(description = "Номер телефона", example = "string")
@@ -50,5 +52,14 @@ public class UserDTO {
             "один специальный символ", regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?^&])[A-Za-z\\d@$!%*#?^&]{3,}$")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    @Schema(description = "Дата/время удаления пользователя")
+    private OffsetDateTime archivedAt;
+
+    @Schema(description = "Дата/время создания пользователя")
+    private OffsetDateTime createdAt;
+
+    @Schema(description = "Дата/время обновления пользователя")
+    private OffsetDateTime updatedAt;
 
 }

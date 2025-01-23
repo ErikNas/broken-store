@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -34,4 +36,24 @@ public class UsersEntity {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "archived_at")
+    private OffsetDateTime archivedAt;
+
+    @Column(name = "created_at", updatable = false)
+    private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = OffsetDateTime.now();
+    }
 }

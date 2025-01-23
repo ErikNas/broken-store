@@ -37,7 +37,7 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Добавить пользователя")
     @ApiResponse(responseCode = "201 Created", description = "Пользователь добавлен")
-    @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
+    @ApiResponse(responseCode = "422 Unprocessable Entity", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
     public ResponseEntity<UserDTO> addUser(@RequestBody @Validated UserDTO dto) {
