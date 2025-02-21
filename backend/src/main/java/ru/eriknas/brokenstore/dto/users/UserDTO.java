@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -19,19 +17,19 @@ public class UserDTO {
     private Integer id;
 
     @Schema(description = "Имя пользователя", example = "string")
-    @NotNull(message = "first_name: Не может быть пустым")
-    @Pattern(message = "first_name: Имя пользователя не может содержать спец. символы и должно содержать не более 32 символов",
-            regexp = "^[a-zA-Zа-яА-ЯЁё]{1,32}$") //todo добавить ввод на русском языке
+    @NotBlank(message = "Не может быть пустым")
+    @Pattern(message = "first_name: Имя пользователя не может содержать цифры, спец. символы и должно содержать не более 32 символов",
+            regexp = "^[a-zA-Zа-яА-ЯЁё]{1,32}$")
     private String firstName;
 
     @Schema(description = "Фамилия пользователя", example = "string")
-    @NotNull(message = "last_name: Не может быть пустым")
-    @Pattern(message = "last_name: Фамилия пользователя не может содержать спец. символы и должно содержать не более 32 символов",
-            regexp = "^[a-zA-Zа-яА-ЯЁё]{1,32}$") //todo добавить ввод на русском языке
+    @NotBlank(message = "Не может быть пустым")
+    @Pattern(message = "last_name: Фамилия пользователя не может содержать цифры, спец. символы и должно содержать не более 32 символов",
+            regexp = "^[a-zA-Zа-яА-ЯЁё]{1,32}$")
     private String lastName;
 
     @Schema(description = "Номер телефона", example = "string")
-    @Pattern(message = "phone: Номер телефона должен начинаться с 7",regexp = "^7\\d{10}$")
+    @Pattern(message = "phone: Номер телефона должен начинаться с 7 и иметь 11 цифр",regexp = "^7\\d{10}$")
     private String phone;
 
     @Schema(description = "Адрес проживания пользователя")
@@ -48,18 +46,8 @@ public class UserDTO {
     @Schema(description = "Пароль", example = "string")
     @Size(min = 8, max = 32)
     @NotNull(message = "password: Не может быть пустым")
-    @Pattern(message = "password: Пароль должен содержать от 8 до 32 символов, как минимум одну букву, одну цифру и" +
-            "один специальный символ", regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?^&])[A-Za-z\\d@$!%*#?^&]{3,}$")
+    @Pattern(message = "password: Пароль должен содержать от 8 до 32 символов, как минимум одну букву, одну цифру и " +
+            "один специальный символ", regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#/?^&])[A-Za-z\\d@$!%*#/?^&]{3,}$")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
-
-    @Schema(description = "Дата/время удаления пользователя")
-    private OffsetDateTime archivedAt;
-
-    @Schema(description = "Дата/время создания пользователя")
-    private OffsetDateTime createdAt;
-
-    @Schema(description = "Дата/время обновления пользователя")
-    private OffsetDateTime updatedAt;
-
 }

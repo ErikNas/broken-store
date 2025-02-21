@@ -14,9 +14,6 @@ public class UsersMapper {
                 .address(entity.getAddress())
                 .email(entity.getEmail())
                 .password(entity.getPassword())
-                .archivedAt(entity.getArchivedAt())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 

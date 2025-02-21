@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,5 +56,20 @@ public class UsersEntity {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = OffsetDateTime.now();
+    }
+
+    @JsonProperty("archived_At")
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
+    @JsonProperty("created_At")
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    @JsonProperty("updated_At")
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

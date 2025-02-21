@@ -37,12 +37,24 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Добавить пользователя")
     @ApiResponse(responseCode = "201 Created", description = "Пользователь добавлен")
-    @ApiResponse(responseCode = "422 Unprocessable Entity", description = "Ошибка валидации",
+    @ApiResponse(responseCode = "400  Bad Request", description = "Ошибка валидации",
+            content = @Content(schema = @Schema(implementation = Error.class)))
+    @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
-    public ResponseEntity<UserDTO> addUser(@RequestBody @Validated UserDTO dto) {
-        UsersEntity usersEntity = usersService.addUsers(dto);
-        return new ResponseEntity<>(UsersMapper.toDto(usersEntity), HttpStatus.CREATED);
+    public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) {
+        if (!isValidPassword(dto.getPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Error("Пароль не соответствует требованиям или содержит недопустимые символы."));
+        }
+
+        try {
+            UsersEntity usersEntity = usersService.addUsers(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(usersEntity);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Error("Произошла ошибка: " + e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -52,8 +64,8 @@ public class UserController {
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<Void> deleteUsers(@PathVariable
-                                @Validated
-                                @Parameter(description = "id пользователя") int id) {
+                                            @Validated
+                                            @Parameter(description = "id пользователя") int id) {
         usersService.getUsersById(id);
         usersService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -63,10 +75,10 @@ public class UserController {
     @Operation(summary = "Найти пользователя по id")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404", description = "Пользователь не найден",
-    content = @Content(schema = @Schema(implementation = Error.class)))
+            content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<UsersEntity> getUsersById(@PathVariable
-                                                        @Validated
-                                                        @Parameter(description = "id пользователя") int id) {
+                                                    @Validated
+                                                    @Parameter(description = "id пользователя") int id) {
         UsersEntity dto = usersService.getUsersById(id);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -101,5 +113,15 @@ public class UserController {
     @GetMapping("/page")
     public Page<UserDTO> getAllUsersAsPage(Pageable pageable) {
         return Page.empty(pageable);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Error> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        Error error = new Error(ex.getMessage());
+        return ResponseEntity.unprocessableEntity().body(error);
+    }
+
+    private boolean isValidPassword(String password) {
+        return password.length() >= 8 && !password.contains("\\");
     }
 }
