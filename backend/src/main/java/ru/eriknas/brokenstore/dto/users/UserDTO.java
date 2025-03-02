@@ -43,4 +43,7 @@ public class UserDTO {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @NotBlank
+    @Schema(description = "Роль пользователя")
+    private String role;
 }
