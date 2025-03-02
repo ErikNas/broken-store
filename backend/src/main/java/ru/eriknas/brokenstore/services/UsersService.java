@@ -10,8 +10,6 @@ import ru.eriknas.brokenstore.mappers.UsersMapper;
 import ru.eriknas.brokenstore.models.entities.UsersEntity;
 import ru.eriknas.brokenstore.repository.UsersRepository;
 
-import java.util.Optional;
-
 @Service
 public class UsersService {
 
@@ -23,8 +21,8 @@ public class UsersService {
         this.usersRepository = usersRepository;
     }
 
-    public UsersEntity addUsers(UserDTO userDTO) {
-        return usersRepository.save(UsersMapper.toEntity(userDTO));
+    public UsersEntity addUsers(UserDTO dto) {
+        return usersRepository.save(UsersMapper.toEntity(dto));
     }
 
     public UsersEntity getUsersById(int id) {
