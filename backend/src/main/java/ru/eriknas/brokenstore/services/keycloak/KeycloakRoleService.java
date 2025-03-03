@@ -1,10 +1,11 @@
-package ru.eriknas.brokenstore.keycloakclient;
+package ru.eriknas.brokenstore.services.keycloak;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import ru.eriknas.brokenstore.dto.users.Role;
 
 import java.util.ArrayList;
@@ -13,7 +14,8 @@ import java.util.List;
 //@RestController
 //@RequestMapping("/keycloak")
 //@SecurityRequirement(name = "Keycloak")
-public class RoleResource {
+@Service
+public class KeycloakRoleService {
 
 	@Autowired
 	KeycloakSecurityUtil keycloakUtil;

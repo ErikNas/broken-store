@@ -1,4 +1,4 @@
-package ru.eriknas.brokenstore.keycloakclient;
+package ru.eriknas.brokenstore.services.keycloak;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;

@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
@@ -19,6 +21,7 @@ import ru.eriknas.brokenstore.mappers.UsersMapper;
 import ru.eriknas.brokenstore.models.entities.Error;
 import ru.eriknas.brokenstore.models.entities.UsersEntity;
 import ru.eriknas.brokenstore.services.UsersService;
+import ru.eriknas.brokenstore.services.keycloak.KeycloakUserService;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -28,10 +31,12 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UsersService usersService;
+    private final KeycloakUserService keycloakUserService;
 
     @Autowired
-    public UserController(UsersService usersService) {
+    public UserController(UsersService usersService, KeycloakUserService keycloakUserService) {
         this.usersService = usersService;
+        this.keycloakUserService = keycloakUserService;
     }
 
     @PostMapping
@@ -40,8 +45,11 @@ public class UserController {
     @ApiResponse(responseCode = "422 Unprocessable Entity", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
-    public ResponseEntity<UserDTO> addUser(@RequestBody @Validated UserDTO dto) {
+    @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
+    @Secured("ROLE_ADMIN")
+    public ResponseEntity<UserDTO> addUser(@RequestBody @Validated UserDTO dto) throws Exception {
         UsersEntity usersEntity = usersService.addUsers(dto);
+        keycloakUserService.addUser(dto);
         return new ResponseEntity<>(UsersMapper.toDto(usersEntity), HttpStatus.CREATED);
     }
 
@@ -51,6 +59,7 @@ public class UserController {
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<Void> deleteUsers(@PathVariable
                                 @Validated
                                 @Parameter(description = "id пользователя") int id) {
