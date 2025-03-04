@@ -9,4 +9,5 @@ import ru.eriknas.brokenstore.models.entities.UsersEntity;
 @Repository
 public interface UsersRepository extends CrudRepository<UsersEntity, Integer> {
     Page<UsersEntity> findAll(Pageable pageable);
+    boolean existsByEmail(String email);
 }

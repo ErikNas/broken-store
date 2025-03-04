@@ -4,13 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.eriknas.brokenstore.controllers.api.EmailAlreadyExistsException;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
 import ru.eriknas.brokenstore.exception.NotFoundException;
 import ru.eriknas.brokenstore.mappers.UsersMapper;
 import ru.eriknas.brokenstore.models.entities.UsersEntity;
 import ru.eriknas.brokenstore.repository.UsersRepository;
-
-import java.util.Optional;
 
 @Service
 public class UsersService {
@@ -23,8 +22,11 @@ public class UsersService {
         this.usersRepository = usersRepository;
     }
 
-    public UsersEntity addUsers(UserDTO userDTO) {
-        return usersRepository.save(UsersMapper.toEntity(userDTO));
+    public UsersEntity addUsers(UserDTO dto) {
+        if (usersRepository.existsByEmail(dto.getEmail())) {
+            throw new EmailAlreadyExistsException("Email уже существует");
+        }
+        return usersRepository.save(UsersMapper.toEntity(dto));
     }
 
     public UsersEntity getUsersById(int id) {

@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
-//дефолтный ответ для всех запросов
-@ApiResponses(@ApiResponse(responseCode = "200", useReturnTypeSchema = true))
 public class UserController {
 
     private final UsersService usersService;
@@ -38,14 +35,26 @@ public class UserController {
     }
 
     @PostMapping
-    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
-    @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
+    @Operation(summary = "Добавить пользователя")
+    @ApiResponse(responseCode = "201 Created", description = "Пользователь добавлен")
+    @ApiResponse(responseCode = "400  Bad Request", description = "Ошибка валидации",
+            content = @Content(schema = @Schema(implementation = Error.class)))
+    @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
-    @Operation(summary = "Добавить пользователя")
-    public ResponseEntity<UserDTO> addUser(@RequestBody @Validated UserDTO userDTO) {
-        UsersEntity usersEntity = usersService.addUsers(userDTO);
-        return new ResponseEntity<>(UsersMapper.toDto(usersEntity), HttpStatus.CREATED);
+    public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) {
+        if (!isValidPassword(dto.getPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Error("Пароль не соответствует требованиям или содержит недопустимые символы."));
+        }
+
+        try {
+            UsersEntity usersEntity = usersService.addUsers(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(usersEntity);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Error("Произошла ошибка: " + e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -54,6 +63,9 @@ public class UserController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
     @Operation(summary = "Удалить пользователя")
+    @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
+    @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
+            content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<Void> deleteUsers(@PathVariable
                                             @Validated
                                             @Parameter(description = "id пользователя") int id) {
@@ -63,26 +75,25 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Найти пользователя по id")
+    @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
-    @Operation(summary = "Найти пользователя по id")
-    public ResponseEntity<UserDTO> getUsersById(@PathVariable
-                                                @Validated
-                                                @Parameter(description = "id пользователя") int id) {
-        UsersEntity usersEntity = usersService.getUsersById(id);
-        UserDTO userDTO = UsersMapper.toDto(usersEntity);
-        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    public ResponseEntity<UsersEntity> getUsersById(@PathVariable
+                                                    @Validated
+                                                    @Parameter(description = "id пользователя") int id) {
+        UsersEntity dto = usersService.getUsersById(id);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @Operation(summary = "Получить список всех сотрудников")
-    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200 OK")
     public Collection<UserDTO> getAllUsers(@RequestParam(required = false, defaultValue = "0")
-                                           @Parameter(description = "min: 0") //раз
+                                           @Parameter(description = "min: 0")
                                            @Validated @Min(0) int page,
                                            @RequestParam(required = false, defaultValue = "10")
-                                           @Parameter(description = "min: 1") //двас
+                                           @Parameter(description = "min: 1")
                                            @Validated @Min(1) int size) {
         return usersService.getAllUsers(page, size)
                 .get()
@@ -106,5 +117,15 @@ public class UserController {
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     public Page<UserDTO> getAllUsersAsPage(Pageable pageable) {
         return Page.empty(pageable);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Error> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        Error error = new Error(ex.getMessage());
+        return ResponseEntity.unprocessableEntity().body(error);
+    }
+
+    private boolean isValidPassword(String password) {
+        return password.length() >= 8 && !password.contains("\\");
     }
 }
