@@ -58,6 +58,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @ApiResponse(responseCode = "204 NoContent", description = "Новость удалена")
+    @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена",
+            content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
     @Operation(summary = "Удалить пользователя")
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
@@ -111,6 +114,7 @@ public class UserController {
 //    }
 
     @GetMapping("/page")
+    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     public Page<UserDTO> getAllUsersAsPage(Pageable pageable) {
         return Page.empty(pageable);
     }
