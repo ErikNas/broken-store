@@ -6,14 +6,28 @@
     <link rel="stylesheet" href="/css/styles.css">
 <!--    <link rel="stylesheet" href="/static/css/styles.css">-->
 </head>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var links = document.querySelectorAll('a.change-port');
+      for (var link of links) {
+        link.addEventListener('click', function(event) {
+          event.preventDefault();
+          window.location.href =
+            window.location.protocol + '//' +
+            window.location.hostname + ':' +
+            this.getAttribute('href');
+        });
+      }
+    });
+</script>
 <body>
      <div class="header">
          <h1>Broken store</h1>
      </div>
     <a href="/swagger-ui/index.html" class="swagger">Swagger</a><br>
-    <a href="//:9090/" class="prometheus">Prometheus</a><br>
-    <a href="//:3000/login/" class="grafana">Grafana</a><br>
-    <a href="//:9001/" class="minio">Minio</a>
+    <a href="9090/" class="prometheus change-port">Prometheus</a><br>
+    <a href="3000/login/" class="grafana change-port">Grafana</a><br>
+    <a href="9001/" class="minio change-port">Minio</a>
 </body>
 </html>
 
