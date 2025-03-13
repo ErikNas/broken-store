@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -44,7 +43,6 @@ public class UserController {
     @ApiResponse(responseCode = "201 Created", description = "Пользователь добавлен")
     @ApiResponse(responseCode = "422 Unprocessable Entity", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @SecurityRequirements
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
     @Secured("ROLE_ADMIN")
     public ResponseEntity<UserDTO> addUser(@RequestBody @Validated UserDTO dto) throws Exception {
@@ -54,15 +52,14 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @SecurityRequirements
     @Operation(summary = "Удалить пользователя")
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Secured("ROLE_ADMIN")
     public ResponseEntity<Void> deleteUsers(@PathVariable
-                                @Validated
-                                @Parameter(description = "id пользователя") int id) {
+                                            @Validated
+                                            @Parameter(description = "id пользователя") int id) {
         usersService.getUsersById(id);
         usersService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -72,10 +69,10 @@ public class UserController {
     @Operation(summary = "Найти пользователя по id")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404", description = "Пользователь не найден",
-    content = @Content(schema = @Schema(implementation = Error.class)))
+            content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<UsersEntity> getUsersById(@PathVariable
-                                                        @Validated
-                                                        @Parameter(description = "id пользователя") int id) {
+                                                    @Validated
+                                                    @Parameter(description = "id пользователя") int id) {
         UsersEntity dto = usersService.getUsersById(id);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
