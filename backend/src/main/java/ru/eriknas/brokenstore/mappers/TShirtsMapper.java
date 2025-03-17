@@ -17,9 +17,6 @@ public class TShirtsMapper {
                 .countryOfProduction(entity.getCountryOfProduction())
                 .description(entity.getDescription())
                 .price(entity.getPrice())
-                .archivedAt(entity.getArchivedAt())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 

@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.controllers.api;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,4 +40,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new Error("Некорректный запрос: " + ex.getMessage()));
     }
+
+    @ExceptionHandler(JsonMappingException.class)
+    public ResponseEntity<String> handleJsonMappingException(JsonMappingException ex) {
+        return ResponseEntity.badRequest().body("Invalid request payload: " + ex.getMessage());
+    }
+
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+//        String errors = ex.getBindingResult()
+//                .getAllErrors()
+//                .stream()
+//                .map(error -> error.getDefaultMessage())
+//                .collect(Collectors.joining(", "));
+//        return ResponseEntity.badRequest().body("Validation failed: " + errors);
+//    }
 }
