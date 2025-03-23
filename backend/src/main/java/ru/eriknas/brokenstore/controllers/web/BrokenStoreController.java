@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.controllers.web;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.tomcat.util.file.ConfigurationSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ru.eriknas.brokenstore.services.GeneralService;
 
 @Controller
+@Tag(name = "Управление стилями")
 public class BrokenStoreController {
 
     private final GeneralService service;
