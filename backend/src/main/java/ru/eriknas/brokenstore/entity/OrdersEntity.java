@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,9 +50,24 @@ public class OrdersEntity {
     @Column(name = "archived_at")
     private OffsetDateTime archivedAt;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    @JsonProperty("archived_at")
+    public OffsetDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
+    @JsonProperty("created_at")
+    public OffsetDateTime getCreateAt() {
+        return createdAt;
+    }
+
+    @JsonProperty("updated_at")
+    public OffsetDateTime getUpdateAt() {
+        return updatedAt;
+    }
 }

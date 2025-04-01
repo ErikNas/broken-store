@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/order")
+@Validated
+@Tag(name = "Заказы")
 public class OrderController {
 
     private final OrdersService ordersService;
@@ -83,13 +87,28 @@ public class OrderController {
     @GetMapping("/all")
     @Operation(summary = "Получить список всех заказов")
     @ApiResponse(responseCode = "200 OK")
-    public Collection<OrderInfoDTO> getAllOrders(@RequestParam(required = false, defaultValue = "0")
-                                                 @Parameter(description = "min: 0") int page,
+    @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
+            content = @Content(schema = @Schema(implementation = Error.class)))
+    @ApiResponse(responseCode = "404 NotFound", description = "Заказ не найден",
+            content = @Content(schema = @Schema(implementation = Error.class)))
+    public ResponseEntity<Collection<OrderInfoDTO>> getAllOrders(@RequestParam(required = false, defaultValue = "0")
+                                                     @Parameter(description = "min: 0")
+                                                     @Validated @Min(0) int page,
                                                  @RequestParam(required = false, defaultValue = "10")
-                                                 @Parameter(description = "min: 1") int size) {
-        return ordersService.getAllOrders(page, size)
+                                                     @Parameter(description = "min: 1")
+                                                     @Validated @Min(1) int size) {
+        if (page < 0 || size < 1) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Collection<OrderInfoDTO> order = ordersService.getAllOrders(page, size)
                 .get()
                 .map(OrdersMapper::toDTO)
                 .collect(Collectors.toList());
+
+        if (order.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(order);
     }
 }

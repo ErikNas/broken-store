@@ -37,9 +37,6 @@ public class OrdersMapper {
                 .statusOrder(entity.getStatusOrder())
                 .dataReturn(entity.getDataReturn())
                 .reasonForReturn(entity.getReasonForReturn())
-                .archivedAt(entity.getArchivedAt() != null ? entity.getArchivedAt().toLocalDate() : null)
-                .createdAt(entity.getCreatedAt() != null ? entity.getCreatedAt().toLocalDate() : null)
-                .updatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt().toLocalDate() : null)
                 .build();
     }
 

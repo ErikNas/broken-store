@@ -39,13 +39,4 @@ public class OrderInfoDTO {
 
     @Schema(description = "Причина возврата заказа")
     private String reasonForReturn;
-
-    @Schema(description = "Дата/время удаления записи")
-    private LocalDate archivedAt;
-
-    @Schema(description = "Дата/время создания записи")
-    private LocalDate createdAt;
-
-    @Schema(description = "Дата/время обновления записи")
-    private LocalDate updatedAt;
 }
