@@ -18,6 +18,7 @@ services:
       #      - SPRING_JPA_HIBERNATE_DDL-AUTO=update
       # - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring boot-ddl-auto-generator
       - SPRING_JPA_HIBERNATE_DDL_AUTO=create # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-
+      - MINIO_URL=minio
     deploy:
       resources:
         limits:
