@@ -2,15 +2,16 @@ package ru.eriknas.brokenstore.components;
 
 import io.minio.*;
 import io.minio.errors.*;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.eriknas.brokenstore.exception.NotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 @Component
 public class MinioComponent {
@@ -39,19 +40,21 @@ public class MinioComponent {
         }
     }
 
-    public String getObject(String objectName) throws ServerException, InsufficientDataException,
-            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException,
-            InvalidResponseException, XmlParserException, InternalException {
+    public String getObject(String objectName) throws Exception {
         try (InputStream stream = minioClient
                 .getObject(GetObjectArgs.builder()
                         .bucket(bucketName)
                         .object(objectName)
                         .build())) {
             return new String(stream.readAllBytes());
+        } catch (ErrorResponseException notFoundException) {
+            throw new NotFoundException(notFoundException.getMessage());
+        } catch (Exception e) {
+            throw new InternalException(e.getMessage(), Arrays.toString(e.getStackTrace()));
         }
     }
 
-    public void removeObject(String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void removeObject(String objectName) throws Exception {
         minioClient.removeObject(
                 RemoveObjectArgs.builder()
                         .bucket(bucketName)

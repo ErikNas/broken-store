@@ -30,16 +30,11 @@ public class MinioController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "404 NotFound", description = "Файл не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    public ResponseEntity<?> downloadFile(@RequestParam("file_name") @NotNull String fileName) {
-        try {
+    public ResponseEntity<?> downloadFile(@RequestParam("file_name") @NotNull String fileName) throws Exception {
+
             String file = minioService.downloadFile(fileName);
             return ResponseEntity
-                    .status(HttpStatus.CREATED)
+                    .status(HttpStatus.OK)
                     .body(file);
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new Error("Не удалось скачать файл: " + e.getMessage()));
-        }
     }
 }

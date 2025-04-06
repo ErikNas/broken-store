@@ -1,30 +1,38 @@
-package ru.eriknas.brokenstore.controllers.api;
+package ru.eriknas.brokenstore.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.eriknas.brokenstore.exception.InternalException;
-import ru.eriknas.brokenstore.exception.NotFoundException;
-import ru.eriknas.brokenstore.exception.ValidationException;
 import ru.eriknas.brokenstore.models.entities.Error;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-public class RestExceptionHandler {
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation ->
+                errors.put(violation.getPropertyPath().toString(), violation.getMessage())
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
 
     @ExceptionHandler(NotFoundException.class)
     protected ResponseEntity<Object> handleNotFoundException(Exception ex) {
-
         var error = Error.builder()
                 .type(Error.Type.NOT_FOUND)
                 .message(ex.getMessage())
                 .build();
-
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
@@ -45,12 +53,10 @@ public class RestExceptionHandler {
         var message = ex.getBindingResult().getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(" ,"));
-
         var error = Error.builder()
                 .type(Error.Type.VALIDATION_ERROR)
                 .message(message)
                 .build();
-
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
@@ -66,12 +72,10 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleUnknownException(Exception ex) {
-
         var error = Error.builder()
                 .type(Error.Type.UNEXPECTED)
                 .message(ex.getMessage())
                 .build();
-
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -84,6 +88,15 @@ public class RestExceptionHandler {
                 .message(errorMessage)
                 .build();
 
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    protected ResponseEntity<Object> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
+        var error = Error.builder()
+                .type(Error.Type.VALIDATION_ERROR)
+                .message(ex.getMessage())
+                .build();
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 }

@@ -39,9 +39,6 @@ public class MinioService {
     }
 
     public String downloadFile(String fileName) throws Exception {
-        if (fileName == null) {
-            throw new Exception("Не указано имя скачиваемого файла");
-        }
         return minioComponent.getObject(fileName);
     }
 

@@ -1,4 +1,4 @@
-package ru.eriknas.brokenstore.controllers.api;
+package ru.eriknas.brokenstore.exception;
 
 public class EmailAlreadyExistsException extends RuntimeException {
     public EmailAlreadyExistsException(String message) {
