@@ -1,6 +1,7 @@
 package ru.eriknas.brokenstore.controllers.api;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JsonMappingException.class)
     public ResponseEntity<String> handleJsonMappingException(JsonMappingException ex) {
-        return ResponseEntity.badRequest().body("Invalid request payload: " + ex.getMessage());
+        return ResponseEntity.badRequest().body("Некорректный запроc: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidFormatException.class)
+    public ResponseEntity<String> handleInvalidFormatException(InvalidFormatException ex) {
+        String errorMsg = "Неверный тип данных: " + ex.getPath().get(0).getFieldName();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);
     }
 
 //    @ExceptionHandler(MethodArgumentNotValidException.class)
