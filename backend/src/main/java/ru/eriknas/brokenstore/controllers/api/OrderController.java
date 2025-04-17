@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.store.orders.OrderDTO;
 import ru.eriknas.brokenstore.dto.store.orders.OrderInfoDTO;
 import ru.eriknas.brokenstore.entity.OrdersEntity;
+import ru.eriknas.brokenstore.exception.CountZeroException;
 import ru.eriknas.brokenstore.mappers.OrdersMapper;
 import ru.eriknas.brokenstore.model.Error;
 import ru.eriknas.brokenstore.services.OrdersService;
@@ -43,6 +44,11 @@ public class OrderController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
     public ResponseEntity<OrderInfoDTO> createOrder(@RequestBody @Validated OrderDTO dto) {
+        dto.getTShirtOrders().forEach(tShirtOrderDTO -> {
+            if (tShirtOrderDTO.getCount() <= 0) {
+                throw new CountZeroException("Количество должно быть больше нуля");
+            }
+        });
         OrderInfoDTO orderInfo = ordersService.createOrder(dto);
         return new ResponseEntity<>(orderInfo, HttpStatus.CREATED);
     }
@@ -110,5 +116,11 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.ok(order);
+    }
+
+    @ExceptionHandler(CountZeroException.class)
+    public final ResponseEntity<Error> handleCountZeroException(CountZeroException ex) {
+        Error error = new Error(ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 }

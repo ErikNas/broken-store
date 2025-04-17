@@ -12,6 +12,10 @@ public class Error {
     private String message;
     private Type type;
 
+    public Error(String message) {
+        this.message = message;
+    }
+
     public enum Type {
         UNEXPECTED,
         VALIDATION_ERROR,
