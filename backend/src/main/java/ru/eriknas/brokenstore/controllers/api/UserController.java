@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
+import ru.eriknas.brokenstore.exception.EmailAlreadyExistsException;
 import ru.eriknas.brokenstore.mappers.UsersMapper;
 import ru.eriknas.brokenstore.models.entities.Error;
 import ru.eriknas.brokenstore.models.entities.UsersEntity;

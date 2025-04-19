@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.eriknas.brokenstore.controllers.api.EmailAlreadyExistsException;
+import ru.eriknas.brokenstore.exception.EmailAlreadyExistsException;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
 import ru.eriknas.brokenstore.exception.NotFoundException;
 import ru.eriknas.brokenstore.mappers.UsersMapper;
