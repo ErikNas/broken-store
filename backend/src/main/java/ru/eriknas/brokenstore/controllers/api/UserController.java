@@ -13,6 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
@@ -21,6 +24,7 @@ import ru.eriknas.brokenstore.mappers.UsersMapper;
 import ru.eriknas.brokenstore.models.entities.Error;
 import ru.eriknas.brokenstore.models.entities.UsersEntity;
 import ru.eriknas.brokenstore.services.UsersService;
+import ru.eriknas.brokenstore.services.keycloak.KeycloakUserService;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -31,10 +35,12 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UsersService usersService;
+    private final KeycloakUserService keycloakUserService;
 
     @Autowired
-    public UserController(UsersService usersService) {
+    public UserController(UsersService usersService, KeycloakUserService keycloakUserService) {
         this.usersService = usersService;
+        this.keycloakUserService = keycloakUserService;
     }
 
     @PostMapping
@@ -45,6 +51,8 @@ public class UserController {
     @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @SecurityRequirements
+    @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) {
         if (!isValidPassword(dto.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -61,14 +69,10 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @ApiResponse(responseCode = "204 NoContent", description = "Новость удалена")
-    @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена",
-            content = @Content(schema = @Schema(implementation = Error.class)))
-    @SecurityRequirements
-    @Operation(summary = "Удалить пользователя")
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<Void> deleteUsers(@PathVariable
                                             @Validated
                                             @Parameter(description = "id пользователя") int id) {
