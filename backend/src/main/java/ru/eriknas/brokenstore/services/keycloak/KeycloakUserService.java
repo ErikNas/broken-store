@@ -119,7 +119,7 @@ public class KeycloakUserService {
                 .build();
     }
 
-    private UserRepresentation mapUserRep(UserDTO user, Map<String, String> roleGroups) throws Exception {
+    private UserRepresentation mapUserRep(UserDTO user, Map<String, String> roleGroups) {
         UserRepresentation userRep = new UserRepresentation();
         userRep.setUsername(user.getEmail());
         userRep.setFirstName(user.getFirstName());
@@ -129,7 +129,7 @@ public class KeycloakUserService {
         userRep.setEmailVerified(false);
 
         if (!roleGroups.containsKey(user.getRole())) {
-            throw new Exception("Некорректно задана роль пользователя");
+            throw new IllegalArgumentException("Некорректно задана роль пользователя");
         }
         userRep.setGroups(List.of(roleGroups.get(user.getRole())));
 

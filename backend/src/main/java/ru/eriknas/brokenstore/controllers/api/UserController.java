@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -49,30 +48,24 @@ public class UserController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @SecurityRequirements
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
-    @Secured("ROLE_ADMIN")
-    public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) throws Exception {
         if (!isValidPassword(dto.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Error("Пароль не соответствует требованиям или содержит недопустимые символы."));
         }
 
-        try {
-            UsersEntity usersEntity = usersService.addUsers(dto);
-            keycloakUserService.addUser(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(usersEntity);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new Error("Произошла ошибка: " + e.getMessage()));
-        }
+        UsersEntity usersEntity = usersService.addUsers(dto);
+        keycloakUserService.addUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(usersEntity);
     }
 
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteUsers(@PathVariable
                                             @Validated
                                             @Parameter(description = "id пользователя") int id) {
