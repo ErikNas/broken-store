@@ -13,10 +13,7 @@ import ru.eriknas.brokenstore.services.GeneralService;
 
 @RestController
 @RequestMapping("/api/hello")
-@Tag(
-        name = "Hello",
-        description = "Группа тестовых методов для того, чтобы научиться работать со свагером"
-)
+@Tag(name = "Приветствие")
 public class HelloController {
 
     private final GeneralService service;

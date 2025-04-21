@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.services;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,7 @@ public class TShirtService {
         return tShirtsRepository.save(TShirtsMapper.toEntity(dto));
     }
 
-    public TShirtsEntity updateTShirt(Integer id, TShirtsDTO dto) {
+    public TShirtsEntity updateTShirt(Integer id, @Valid TShirtsDTO dto) {
         TShirtsEntity entity = tShirtsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format(TSHIRT_NOT_FOUND, id)));
 
