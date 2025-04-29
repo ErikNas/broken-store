@@ -63,6 +63,7 @@ public class TShirtController {
         }
         created.setImage(fileNameInMinio);
         return new ResponseEntity<>(TShirtsMapper.toDto(created), HttpStatus.CREATED);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")

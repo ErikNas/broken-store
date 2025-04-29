@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
@@ -21,6 +22,7 @@ import ru.eriknas.brokenstore.mappers.UsersMapper;
 import ru.eriknas.brokenstore.models.entities.Error;
 import ru.eriknas.brokenstore.models.entities.UsersEntity;
 import ru.eriknas.brokenstore.services.UsersService;
+import ru.eriknas.brokenstore.services.keycloak.KeycloakUserService;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -31,10 +33,12 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UsersService usersService;
+    private final KeycloakUserService keycloakUserService;
 
     @Autowired
-    public UserController(UsersService usersService) {
+    public UserController(UsersService usersService, KeycloakUserService keycloakUserService) {
         this.usersService = usersService;
+        this.keycloakUserService = keycloakUserService;
     }
 
     @PostMapping
@@ -44,31 +48,24 @@ public class UserController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @SecurityRequirements
-    public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) {
+    @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) throws Exception {
         if (!isValidPassword(dto.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Error("Пароль не соответствует требованиям или содержит недопустимые символы."));
         }
 
-        try {
-            UsersEntity usersEntity = usersService.addUsers(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(usersEntity);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new Error("Произошла ошибка: " + e.getMessage()));
-        }
+        UsersEntity usersEntity = usersService.addUsers(dto);
+        keycloakUserService.addUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(usersEntity);
     }
 
     @DeleteMapping("/{id}")
-    @ApiResponse(responseCode = "204 NoContent", description = "Новость удалена")
-    @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена",
-            content = @Content(schema = @Schema(implementation = Error.class)))
-    @SecurityRequirements
-    @Operation(summary = "Удалить пользователя")
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteUsers(@PathVariable
                                             @Validated
                                             @Parameter(description = "id пользователя") int id) {
