@@ -62,6 +62,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить пользователя")
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
