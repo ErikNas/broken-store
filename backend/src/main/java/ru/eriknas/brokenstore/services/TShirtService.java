@@ -24,6 +24,9 @@ public class TShirtService {
     }
 
     public TShirtsEntity createTShirt(TShirtsDTO dto) {
+        if (dto.getPrice() != null && dto.getPrice() % 1 == 0) {
+            dto.setPrice(dto.getPrice().doubleValue());
+        }
         return tShirtsRepository.save(TShirtsMapper.toEntity(dto));
     }
 
