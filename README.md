@@ -102,3 +102,112 @@ sudo docker rmi $(sudo docker images -a -q)
 ```
 
 TODO: Написать команды, которые будут удалять только broken-store
+
+## Схема сервисов
+
+<details>
+
+<summary>Код для построения диаграммы компонентов в PlantUML</summary>
+
+```PlantUML
+@startuml
+() "user interface" as frontend #red
+package "Controllers" {
+[t-shirt-controller] as t_shirt
+[user-controller] as user
+[pay-controller] as pay #red
+[news-controller] as news
+[broken-store-controller] as br
+[server-error-controller] as erorrs
+[orders-controller] as orders #red
+}
+package "service" {
+[keycloak] as keycloak
+[grafana]
+}
+package "DB" {
+database "minio" {
+}
+database "prometheus" {
+}
+database "postgres" {
+}
+}
+user -- keycloak : Регистрация/авторизация
+t_shirt -- orders : Инфо о футболке
+user -- orders : Инфо о пользователе
+pay -- orders : Оплата
+frontend -- news
+frontend -- t_shirt
+frontend -- keycloak
+prometheus -- grafana
+@enduml
+```
+
+</details>
+
+<details>
+
+<summary>Визуальное отображение</summary>
+
+Красным отмечены нереализованные сервисы
+![image](https://github.com/user-attachments/assets/ff8907d5-8c48-4e72-a224-ff2ecb8e35a5)
+
+</details>
+
+## Описание возможностей
+### Сервис "Футболки"
+```
+GET/t-shirt/{id} - Найти футболку по ID
+GET/t-shirt/all - Получить список всех футболок (+пагинация)
+POST/t-shirt/ - Добавить футболку
+PUT/t-shirt/{id} - Изменить футболку
+DELETE/t-shirt/{id} - Удалить футболку
+```
+
+### Сервис "Пользователи"
+```
+GET/users{id} - Найти пользователя по ID
+GET/users/page - 
+GET/users/all - Получить список всех сотрудников (+пагинация)
+POST/users - Добавить пользователя
+DELETE/users/{id} - Удалить пользователя
+```
+
+### Сервис "Новости"
+```
+GET/news - Получить список всех новостей
+GET/news/{id} - Найти новость по ID
+POST/news - Добавить новость
+DELETE/news/{id} - Удалить новость
+```
+
+### Minio
+```
+GET/download - Получить файл из Minio
+```
+
+### Управление стилями
+```
+GET/css/styles.css
+```
+
+### Ошибки сервера
+```
+GET/api/response200WithError - Ручка, которая присылает 200, но в теле сообщения `Error: Я не смогла`
+GET/api/flakyEndpoint - Ручка, которая отвечает код 500 в 30% случаев (флакер)
+GET/api/error500 - Ручка, которая отвечатет код 500 в 100% случаев
+```
+
+### Приветствие
+```
+GET/api/hello - Поздороваться со Стасом
+```
+
+## Замечания к релизу
+Замечания к релизу
+
+
+## Лицензия
+Наш проект распространяется под лицензией MIT.
+Вы можете свободно использовать, изменять и распространять код, в том числе в коммерческих целях, при условии указания оригинального авторства и копирайта.
