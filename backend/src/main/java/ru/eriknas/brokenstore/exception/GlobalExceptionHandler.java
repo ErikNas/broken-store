@@ -6,6 +6,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -88,6 +89,39 @@ public class GlobalExceptionHandler {
         var error = Error.builder()
                 .type(Error.Type.VALIDATION_ERROR)
                 .message(errorMessage)
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidIdException.class)
+    protected ResponseEntity<Error> handleInvalidIdException(Exception ex) {
+
+        var error = Error.builder()
+                .type(Error.Type.INVALID_CREDENTIALS)
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidPageSizeException.class)
+    protected ResponseEntity<Error> handleInvalidPageSizeException(Exception ex) {
+
+        var error = Error.builder()
+                .type(Error.Type.INVALID_CREDENTIALS)
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Error> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+
+        var error = Error.builder()
+                .type(Error.Type.VALIDATION_ERROR)
+                .message("Неправильный формат данных: " + ex.getMessage())
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);

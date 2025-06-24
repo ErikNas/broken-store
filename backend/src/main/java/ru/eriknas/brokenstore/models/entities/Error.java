@@ -22,6 +22,7 @@ public class Error {
         NOT_FOUND,
         FILE_STORAGE_ERROR,
         DOCUMENT_ERROR,
-        FORBIDDEN_ERROR
+        FORBIDDEN_ERROR,
+        INVALID_CREDENTIALS
     }
 }

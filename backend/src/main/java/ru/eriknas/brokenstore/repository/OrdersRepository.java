@@ -3,9 +3,9 @@ package ru.eriknas.brokenstore.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
-import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
+import ru.eriknas.brokenstore.models.entities.OrdersEntity;
 
-public interface TShirtRepository extends CrudRepository<TShirtsEntity, Integer> {
+public interface OrdersRepository extends CrudRepository<OrdersEntity, Integer> {
 
-    Page<TShirtsEntity> findAll(Pageable pageable);
+    Page<OrdersEntity> findAll(Pageable pageable);
 }

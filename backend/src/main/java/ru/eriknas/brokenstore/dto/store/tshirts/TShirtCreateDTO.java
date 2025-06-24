@@ -1,5 +1,6 @@
-package ru.eriknas.brokenstore.dto.store;
+package ru.eriknas.brokenstore.dto.store.tshirts;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -12,8 +13,8 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(description = "Футболки")
-public class TShirtsDTO {
+@Schema(description = "Добавление футболки")
+public class TShirtCreateDTO {
 
     @Schema(hidden = true)
     private Integer id;
@@ -48,6 +49,7 @@ public class TShirtsDTO {
     @Schema(description = "Дополнительное описание, в т.ч. теги")
     private String description;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#.##")
     @Schema(description = "Цена футболки")
     @NotNull(message = "Укажите цену футболки")
     @Min(value = 0, message = "Цена не может быть отрицательная")

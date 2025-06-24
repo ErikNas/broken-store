@@ -76,20 +76,21 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Найти пользователя по id")
-    @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    public ResponseEntity<UsersEntity> getUsersById(@PathVariable
-                                                    @Validated
-                                                    @Parameter(description = "id пользователя") int id) {
-        UsersEntity dto = usersService.getUsersById(id);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
+    @Operation(summary = "Найти пользователя по id")
+    public ResponseEntity<UserDTO> getUsersById(@PathVariable
+                                                @Validated
+                                                @Parameter(description = "id пользователя") int id) {
+        UsersEntity usersEntity = usersService.getUsersById(id);
+        UserDTO userDTO = UsersMapper.toDto(usersEntity);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
     @GetMapping("/all")
     @Operation(summary = "Получить список всех сотрудников")
-    @ApiResponse(responseCode = "200 OK")
+    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     public Collection<UserDTO> getAllUsers(@RequestParam(required = false, defaultValue = "0")
                                            @Parameter(description = "min: 0")
                                            @Validated @Min(0) int page,

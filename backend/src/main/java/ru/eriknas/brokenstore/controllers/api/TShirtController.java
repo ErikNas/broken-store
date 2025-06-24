@@ -15,10 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtCreateDTO;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtUpdateDTO;
+import ru.eriknas.brokenstore.dto.store.tshirts.TShirtsInfoDTO;
+
 import org.springframework.web.multipart.MultipartFile;
-import ru.eriknas.brokenstore.dto.store.TShirtsDTO;
 import ru.eriknas.brokenstore.mappers.TShirtsMapper;
-import ru.eriknas.brokenstore.models.entities.Error;
 import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
 import ru.eriknas.brokenstore.services.MinioService;
 import ru.eriknas.brokenstore.services.TShirtService;
@@ -49,9 +51,9 @@ public class TShirtController {
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
-    public ResponseEntity<?> createTShirt(@RequestPart @Validated TShirtsDTO dto,
+    public ResponseEntity<?> createTShirt(@RequestPart @Validated TShirtCreateDTO dto,
                                           @RequestPart(value = "picture", required = false) MultipartFile picture) {
-        TShirtsEntity created = tShirtsService.createTShirt(dto);
+        TShirtsInfoDTO created = tShirtsService.createTShirt(dto);
 
         String fileNameInMinio;
         try {
@@ -62,12 +64,12 @@ public class TShirtController {
                     .body(new Error("Произошла ошибка загрузки файла: " + e.getMessage()));
         }
         created.setImage(fileNameInMinio);
-        return new ResponseEntity<>(TShirtsMapper.toDto(created), HttpStatus.CREATED);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+//        return new ResponseEntity<>(TShirtsMapper.toDto(created), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Изменить футболку")
+    @Operation(summary = "Редактировать футболку")
     @ApiResponse(responseCode = "200 OK", description = "Изменения внесены")
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
@@ -75,8 +77,8 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<TShirtsEntity> updateTShirt(@PathVariable
                                                       @Validated
-                                                      @Parameter(description = "id футболки") int id,
-                                                      @RequestBody @Valid TShirtsDTO dto) {
+                                                      @Parameter(description = "id футболки") String id,
+                                                      @RequestBody @Valid TShirtUpdateDTO dto) {
         TShirtsEntity updated = tShirtsService.updateTShirt(id, dto);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
@@ -89,7 +91,7 @@ public class TShirtController {
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
     public ResponseEntity<Void> deleteTShirt(@PathVariable
                                              @Validated
-                                             @Parameter(description = "id футболки") int id) throws Exception {
+                                             @Parameter(description = "id футболки") String id) throws Exception {
         TShirtsEntity tShirt = tShirtsService.getTShirtById(id);
         tShirtsService.deleteTShirt(id);
         minioService.removeFile(tShirt.getImage());
@@ -103,7 +105,7 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<TShirtsEntity> getTShirtById(@PathVariable
                                                        @Validated
-                                                       @Parameter(description = "id футболки") int id) {
+                                                       @Parameter(description = "id футболки") String id) {
         TShirtsEntity dto = tShirtsService.getTShirtById(id);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -113,7 +115,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    public ResponseEntity<Collection<TShirtsDTO>> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
+    public ResponseEntity<Collection<TShirtsInfoDTO>> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
                                                 @Parameter(description = "min: 0")
                                                 @Validated @Min(0) int page,
                                                 @RequestParam(required = false, defaultValue = "10")
@@ -123,7 +125,7 @@ public class TShirtController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Collection<TShirtsDTO> tShirts = tShirtsService.getAllTShirts(page, size)
+        Collection<TShirtsInfoDTO> tShirts = tShirtsService.getAllTShirts(page, size)
                 .get()
                 .map(TShirtsMapper::toDto)
                 .collect(Collectors.toList());
