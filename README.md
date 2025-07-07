@@ -112,7 +112,35 @@ sudo docker network prune
 sudo docker rmi $(sudo docker images -a -q)
 ```
 
-TODO: Написать команды, которые будут удалять только broken-store
+### Удаление конкретных контейнеров Broken-store
+
+```Bash
+docker ps -a (получение списка всех контейнеров (в том числе запущенных))
+docker stop <container_id_or_name> (остановка контейнера)
+docker rm <container_id_or_name> (удаление контейнера) 
+```
+
+### Удаление конкретных образов Broken-store
+
+```Bash
+docker images (получение списка всех образов)
+docker rmi <image_id_or_name> (удаление образа) 
+```
+
+### Удаление конкретных томов Broken-store
+
+```Bash
+docker volume ls (получение списка всех томов (volumes))
+docker volume rm <имя_или_ID_volume> (удаление тома)
+```
+**Важные моменты**: удалять volume можно только если он не используется контейнерами.
+Если volume занят, сначала остановите и удалите все контейнеры, использующие его.
+Чтобы проверить, какие контейнеры используют volume, используйте команду:
+```Bash
+docker ps -a --filter volume=<имя_volume>
+```
+
+
 
 ## Схема сервисов
 
