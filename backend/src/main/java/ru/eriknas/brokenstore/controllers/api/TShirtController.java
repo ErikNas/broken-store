@@ -6,9 +6,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +53,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
-    public ResponseEntity<?> createTShirt(@RequestPart @Validated TShirtCreateDTO dto,
+    public ResponseEntity<?> createTShirt(@RequestBody @Validated TShirtCreateDTO dto,
                                           @RequestPart(value = "picture", required = false) MultipartFile picture) {
         TShirtsInfoDTO created = tShirtsService.createTShirt(dto);
 
@@ -101,13 +103,25 @@ public class TShirtController {
     @GetMapping("/{id}")
     @Operation(summary = "Найти футболку по id")
     @ApiResponse(responseCode = "200 OK")
-    @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
+    @ApiResponse(responseCode = "400 BadRequest", description = "ID футболки не может быть пустым")
+            @ApiResponse(responseCode = "404 NotFound",description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    public ResponseEntity<TShirtsEntity> getTShirtById(@PathVariable
+
+
+    public ResponseEntity<?> getTShirtById(@PathVariable
                                                        @Validated
+                                                       @NotBlank
                                                        @Parameter(description = "id футболки") String id) {
-        TShirtsEntity dto = tShirtsService.getTShirtById(id);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        //добавлена проверка на пустой ввод ID
+        if(id == null || id.trim().isEmpty()){
+            return ResponseEntity.badRequest().body("ID футболки не может быть пустым"); //404
+        }
+        try {
+            TShirtsEntity dto = tShirtsService.getTShirtById(id);
+            return ResponseEntity.ok(dto);
+        }catch (EntityNotFoundException ex){
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/all")
