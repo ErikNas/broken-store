@@ -112,30 +112,17 @@ sudo docker network prune
 sudo docker rmi $(sudo docker images -a -q)
 ```
 
-### Удаление конкретных контейнеров Broken-store
+### Скрипт по удалению контейнеров, образов и томов Broken-store
 
-```Bash
-docker stop $(docker ps -a --filter=name='broken' -q) - Остановка контейнеров Broken-store
-docker rm $(docker ps -a --filter=name='broken' -q) - Удаление контейров Broken-store
+Скрипт `cleanup_broken_store.sh` удаляет:
+- Контейнеры с именем, содержащим `**broken**`
+- Их volumes
+- Их образы
+
+## Как использовать
+
 ```
-
-### Удаление конкретных образов Broken-store
-
-```Bash
-docker rmi $(docker images --filter=reference='client' -q)
-docker rmi $(docker images --filter=reference='minio/minio' -q)
-docker rmi $(docker images --filter=reference='minio/mc' -q)
-docker rmi $(docker images --filter=reference='quay.io/keycloak/keycloak' -q)
-docker rmi $(docker images --filter=reference='grafana/grafana' -q)
-docker rmi $(docker images --filter=reference='gcr.io/cadvisor/cadvisor:latest' -q)
-docker rmi $(docker images --filter=reference='prom/prometheus' -q)
-docker rmi $(docker images --filter=reference='postgres' -q)
-```
-
-### Удаление конкретных томов Broken-store
-
-```Bash
-docker volume rm $(docker volume ls --filter=name='broken' -q)
+./cleanup_broken_store.sh
 ```
 
 ## Схема сервисов
