@@ -115,13 +115,13 @@ sudo docker rmi $(sudo docker images -a -q)
 ### Скрипт по удалению контейнеров, образов и томов Broken-store
 
 Скрипт `cleanup_broken_store.sh` удаляет:
-- Контейнеры с именем, содержащим `**broken**`
+- Контейнеры с именем, содержащим `broken`
 - Их volumes
 - Их образы
 
-## Как использовать
+#### Как использовать
 
-```
+```Bash
 ./cleanup_broken_store.sh
 ```
 
