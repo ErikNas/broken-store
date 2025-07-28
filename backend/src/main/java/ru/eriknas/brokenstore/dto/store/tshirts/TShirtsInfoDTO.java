@@ -51,4 +51,7 @@ public class TShirtsInfoDTO {
 
     @Schema(description = "Дата/время обновления записи")
     private LocalDate updatedAt;
+
+    @Schema(description = "Статус футболки")
+    private boolean isActive;
 }

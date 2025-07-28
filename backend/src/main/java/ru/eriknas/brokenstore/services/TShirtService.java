@@ -40,6 +40,7 @@ public class TShirtService {
             }
         TShirtsEntity entity = TShirtsMapper.toEntity(dto);
         entity.setCreatedAt(OffsetDateTime.now());
+        entity.setActive(true);
         return TShirtsMapper.toDto(tShirtsRepository.save(entity));
     }
 
@@ -75,7 +76,6 @@ public class TShirtService {
         if (size <= 0) {
             throw new InvalidPageSizeException(INVALID_SIZE);
         }
-
         return tShirtsRepository.findAll(PageRequest.of(page, size));
     }
 

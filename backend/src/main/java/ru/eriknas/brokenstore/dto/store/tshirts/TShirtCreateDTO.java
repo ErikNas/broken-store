@@ -49,6 +49,9 @@ public class TShirtCreateDTO {
     @Schema(description = "Дополнительное описание, в т.ч. теги")
     private String description;
 
+    @Schema
+    private boolean isActive;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#.##")
     @Schema(description = "Цена футболки")
     @NotNull(message = "Укажите цену футболки")

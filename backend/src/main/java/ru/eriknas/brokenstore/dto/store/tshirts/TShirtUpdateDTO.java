@@ -43,8 +43,13 @@ public class TShirtUpdateDTO {
     @Schema(description = "Дополнительное описание, в т.ч. теги")
     private String description;
 
+    @Schema(description = "Статус футболки")
+    private boolean isActive;
+
     @Schema(description = "Цена футболки")
     @NotNull(message = "Укажите цену футболки")
     @Min(value = 0, message = "Цена не может быть отрицательная")
     private Double price;
+
+
 }

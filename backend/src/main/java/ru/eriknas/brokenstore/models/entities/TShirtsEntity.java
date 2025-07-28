@@ -57,6 +57,9 @@ public class TShirtsEntity {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
+    @Column(name = "is_active")
+    private boolean isActive;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = OffsetDateTime.now();
@@ -81,5 +84,9 @@ public class TShirtsEntity {
     @JsonProperty("updated_At")
     public OffsetDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setActive(boolean active){
+        isActive = active;
     }
 }

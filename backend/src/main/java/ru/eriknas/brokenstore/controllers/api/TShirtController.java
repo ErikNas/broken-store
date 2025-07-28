@@ -28,6 +28,7 @@ import ru.eriknas.brokenstore.services.MinioService;
 import ru.eriknas.brokenstore.services.TShirtService;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.*;
@@ -56,6 +57,7 @@ public class TShirtController {
     public ResponseEntity<?> createTShirt(@RequestBody @Validated TShirtCreateDTO dto,
                                           @RequestPart(value = "picture", required = false) MultipartFile picture) {
         TShirtsInfoDTO created = tShirtsService.createTShirt(dto);
+        dto.setActive(true); //Автоматическое создание статуса isActive = true
 
         String fileNameInMinio;
         try {
@@ -82,7 +84,7 @@ public class TShirtController {
                                                       @Parameter(description = "id футболки") String id,
                                                       @RequestBody @Valid TShirtUpdateDTO dto) {
         TShirtsEntity updated = tShirtsService.updateTShirt(id, dto);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
+        return ResponseEntity.ok(updated); //изменение статуса(поле isActive автоматом обрабатывается через ДТО)
     }
 
     @DeleteMapping("/{id}")
@@ -104,22 +106,22 @@ public class TShirtController {
     @Operation(summary = "Найти футболку по id")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "400 BadRequest", description = "ID футболки не может быть пустым")
-            @ApiResponse(responseCode = "404 NotFound",description = "Футболка не найдена",
+    @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
 
 
     public ResponseEntity<?> getTShirtById(@PathVariable
-                                                       @Validated
-                                                       @NotBlank
-                                                       @Parameter(description = "id футболки") String id) {
+                                           @Validated
+                                           @NotBlank
+                                           @Parameter(description = "id футболки") String id) {
         //добавлена проверка на пустой ввод ID
-        if(id == null || id.trim().isEmpty()){
+        if (id == null || id.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("ID футболки не может быть пустым"); //404
         }
         try {
             TShirtsEntity dto = tShirtsService.getTShirtById(id);
             return ResponseEntity.ok(dto);
-        }catch (EntityNotFoundException ex){
+        } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -130,11 +132,12 @@ public class TShirtController {
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<Collection<TShirtsInfoDTO>> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
-                                                @Parameter(description = "min: 0")
-                                                @Validated @Min(0) int page,
-                                                @RequestParam(required = false, defaultValue = "10")
-                                                @Parameter(description = "min: 1")
-                                                @Validated @Min(1) int size) {
+                                                                    @Parameter(description = "min: 0")
+                                                                    @Validated @Min(0) int page,
+                                                                    @RequestParam(required = false, defaultValue = "10")
+                                                                     @Parameter(description = "min: 1")
+                                                                    @Validated @Min(1) int size,
+                                                                    @RequestParam(required = false) Boolean isActive) {
         if (page < 0 || size < 1) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -143,10 +146,14 @@ public class TShirtController {
                 .get()
                 .map(TShirtsMapper::toDto)
                 .collect(Collectors.toList());
+        return !tShirts.isEmpty() ? ResponseEntity.ok(tShirts) : ResponseEntity.notFound().build();
 
-        if (tShirts.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        return ResponseEntity.ok(tShirts);
+//Излишняя валидация???
+//        if (tShirts.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//        }
+//        return ResponseEntity.ok(tShirts);
     }
+    //todo Написать реализацию метода внизу, и добавить его в методы выше, добавить в create t-Shirt DTO
 }
+
