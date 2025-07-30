@@ -1,1 +1,4 @@
 rootProject.name = 'broken-store'
+include 'backend-service'
+include 'user-service'
+include 'core'
