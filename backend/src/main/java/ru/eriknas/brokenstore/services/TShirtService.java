@@ -38,6 +38,7 @@ public class TShirtService {
             }
         TShirtsEntity entity = TShirtsMapper.toEntity(dto);
         entity.setCreatedAt(OffsetDateTime.now());
+        entity.setActive(true);
         return TShirtsMapper.toDto(tShirtsRepository.save(entity));
     }
 
@@ -63,7 +64,7 @@ public class TShirtService {
         return findTShirtById(parseId(id));
     }
 
-    public Page<TShirtsEntity> getAllTShirts(int page, int size) {
+    public Page<TShirtsEntity> getAllTShirts(int page, int size, boolean isActive) {
 
         if (page < 0) {
             throw new InvalidPageSizeException(INVALID_PAGE);
@@ -72,7 +73,7 @@ public class TShirtService {
             throw new InvalidPageSizeException(INVALID_SIZE);
         }
 
-        return tShirtsRepository.findAll(PageRequest.of(page, size));
+        return tShirtsRepository.findByIsActive(isActive, PageRequest.of(page, size));
     }
 
     private int parseId(String id) {
@@ -105,5 +106,6 @@ public class TShirtService {
         entity.setCountryOfProduction(dto.getCountryOfProduction());
         entity.setDescription(dto.getDescription());
         entity.setPrice(dto.getPrice());
+        entity.setActive(dto.isActive());
     }
 }

@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.dto.store.tshirts;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,6 +43,10 @@ public class TShirtsInfoDTO {
 
     @Schema(description = "Цена футболки")
     private Double price;
+
+    @JsonProperty("isActive")
+    @Schema(description = "Флаг активности футболки")
+    private boolean isActive;
 
     @Schema(description = "Дата/время удаления записи")
     private LocalDate archivedAt;
