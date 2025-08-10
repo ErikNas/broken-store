@@ -109,7 +109,7 @@ public class TShirtController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all") 
     @Operation(summary = "Получить список всех футболок")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
