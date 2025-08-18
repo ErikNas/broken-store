@@ -49,11 +49,11 @@ public class TShirtsInfoDTO {
     private boolean isActive;
 
     @Schema(description = "Дата/время удаления записи")
-    private LocalDate archivedAt;
+    private String archivedAt;
 
     @Schema(description = "Дата/время создания записи")
-    private LocalDate createdAt;
+    private String createdAt;
 
     @Schema(description = "Дата/время обновления записи")
-    private LocalDate updatedAt;
+    private String updatedAt;
 }
