@@ -49,7 +49,7 @@ public class UserController {
     @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) throws Exception {
         if (!isValidPassword(dto.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -80,6 +80,7 @@ public class UserController {
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<UsersEntity> getUsersById(@PathVariable
                                                     @Validated
                                                     @Parameter(description = "id пользователя") int id) {
@@ -90,6 +91,7 @@ public class UserController {
     @GetMapping("/all")
     @Operation(summary = "Получить список всех сотрудников")
     @ApiResponse(responseCode = "200 OK")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public Collection<UserDTO> getAllUsers(@RequestParam(required = false, defaultValue = "0")
                                            @Parameter(description = "min: 0")
                                            @Validated @Min(0) int page,

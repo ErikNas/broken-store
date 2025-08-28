@@ -5,14 +5,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
-import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +26,6 @@ import ru.eriknas.brokenstore.services.TShirtService;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-
-import static org.springframework.http.MediaType.*;
 
 @RestController
 @RequestMapping("/t-shirt")
@@ -50,6 +48,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<?> createTShirt(@RequestPart @Validated TShirtsDTO dto,
                                           @RequestPart(value = "picture", required = false) MultipartFile picture) {
         TShirtsEntity created = tShirtsService.createTShirt(dto);
@@ -74,6 +73,7 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<TShirtsEntity> updateTShirt(@PathVariable
                                                       @Validated
                                                       @Parameter(description = "id футболки") int id,
@@ -88,6 +88,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteTShirt(@PathVariable
                                              @Validated
                                              @Parameter(description = "id футболки") int id) throws Exception {
@@ -102,6 +103,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<TShirtsEntity> getTShirtById(@PathVariable
                                                        @Validated
                                                        @Parameter(description = "id футболки") int id) {
@@ -114,6 +116,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<Collection<TShirtsDTO>> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
                                                 @Parameter(description = "min: 0")
                                                 @Validated @Min(0) int page,

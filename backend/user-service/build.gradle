@@ -6,7 +6,8 @@ version = '0.0.1-SNAPSHOT'
 
 dependencies {
     implementation project(':core')
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation project(':core-security')
+//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.keycloak:keycloak-admin-client:26.0.4'
     implementation 'org.keycloak:keycloak-policy-enforcer:26.0.4'
     implementation 'org.keycloak:keycloak-core:26.0.4'
