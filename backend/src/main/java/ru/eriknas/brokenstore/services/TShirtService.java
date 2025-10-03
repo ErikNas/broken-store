@@ -60,8 +60,9 @@ public class TShirtService {
         }
     }
 
-    public TShirtsEntity getTShirtById(String id) {
-        return findTShirtById(parseId(id));
+    public TShirtsInfoDTO getTShirtById(String id) {
+        TShirtsEntity entity = findTShirtById(parseId(id));
+        return TShirtsMapper.toDto(entity);
     }
 
     public Page<TShirtsEntity> getAllTShirts(int page, int size, boolean isActive) {

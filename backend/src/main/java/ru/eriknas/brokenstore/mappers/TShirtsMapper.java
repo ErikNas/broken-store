@@ -7,6 +7,7 @@ import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class TShirtsMapper {
@@ -25,9 +26,9 @@ public class TShirtsMapper {
                 .description(entity.getDescription())
                 .price(entity.getPrice())
                 .isActive(entity.isActive())
-                .archivedAt(formatToRfc1123(entity.getArchivedAt()))
-                .createdAt(formatToRfc1123(entity.getCreatedAt()))
-                .updatedAt(formatToRfc1123(entity.getUpdatedAt()))
+                .archivedAt(formatDateTime(entity.getArchivedAt()))
+                .createdAt(formatDateTime(entity.getCreatedAt()))
+                .updatedAt(formatDateTime(entity.getUpdatedAt()))
                 .build();
 
     }
@@ -47,11 +48,12 @@ public class TShirtsMapper {
                 .build();
     }
     @Contract
-    private static String formatToRfc1123(OffsetDateTime dateTime) {
+    private static String formatDateTime(OffsetDateTime dateTime) {
         if (dateTime == null) {
             return null;
         }
-        return dateTime.atZoneSameInstant(ZoneId.of("GMT"))
-                .format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        return OffsetDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+                .withZone(ZoneId.of("UTC")));
     }
+
 }

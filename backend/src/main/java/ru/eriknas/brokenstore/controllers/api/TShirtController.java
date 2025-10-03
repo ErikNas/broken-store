@@ -91,7 +91,7 @@ public class TShirtController {
     public ResponseEntity<Void> deleteTShirt(@PathVariable
                                              @Validated
                                              @Parameter(description = "id футболки") String id) throws Exception {
-        TShirtsEntity tShirt = tShirtsService.getTShirtById(id);
+        TShirtsInfoDTO tShirt = tShirtsService.getTShirtById(id);
         tShirtsService.deleteTShirt(id);
         minioService.removeFile(tShirt.getImage());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -102,10 +102,10 @@ public class TShirtController {
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    public ResponseEntity<TShirtsEntity> getTShirtById(@PathVariable
+    public ResponseEntity<TShirtsInfoDTO> getTShirtById(@PathVariable
                                                        @Validated
                                                        @Parameter(description = "id футболки") String id) {
-        TShirtsEntity dto = tShirtsService.getTShirtById(id);
+        TShirtsInfoDTO dto = tShirtsService.getTShirtById(id);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
