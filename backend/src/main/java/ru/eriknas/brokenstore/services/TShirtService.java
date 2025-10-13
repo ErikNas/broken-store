@@ -52,12 +52,15 @@ public class TShirtService {
 
     public void deleteTShirt(String id) {
         int idInt = parseId(id);
-        findTShirtById(idInt);
-        try {
-            tShirtsRepository.deleteById(idInt);
-        } catch (DataIntegrityViolationException ex) {
-            throw new ValidationException("Невозможно удалить футболку, так как она используется в заказе");
-        }
+        TShirtsEntity entity = findTShirtById(idInt);
+        entity.setActive(false);
+        entity.setArchivedAt(OffsetDateTime.now());
+        tShirtsRepository.save(entity);
+//        try {
+//            tShirtsRepository.deleteById(idInt);
+//        } catch (DataIntegrityViolationException ex) {
+//            throw new ValidationException("Невозможно удалить футболку, так как она используется в заказе");
+//        }
     }
 
     public TShirtsInfoDTO getTShirtById(String id) {

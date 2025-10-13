@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
@@ -49,11 +50,11 @@ public class TShirtsInfoDTO {
     private boolean isActive;
 
     @Schema(description = "Дата/время удаления записи")
-    private String archivedAt;
+    private Instant archivedAt;
 
     @Schema(description = "Дата/время создания записи")
-    private String createdAt;
+    private Instant createdAt;
 
     @Schema(description = "Дата/время обновления записи")
-    private String updatedAt;
+    private Instant updatedAt;
 }
