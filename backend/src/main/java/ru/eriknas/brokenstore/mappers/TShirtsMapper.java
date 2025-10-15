@@ -18,7 +18,7 @@ public class TShirtsMapper {
                 .countryOfProduction(entity.getCountryOfProduction())
                 .description(entity.getDescription())
                 .price(entity.getPrice())
-                .isActive(entity.isActive())
+                .isActive(entity.getIsActive() != null ? entity.getIsActive() : true)
                 .build();
     }
 
