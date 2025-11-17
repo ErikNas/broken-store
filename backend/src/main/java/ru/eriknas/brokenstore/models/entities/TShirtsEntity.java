@@ -50,7 +50,6 @@ public class TShirtsEntity {
 
     @JsonProperty("isActive")
     @Column(name = "is_active")
-//    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "archived_at")
@@ -88,12 +87,4 @@ public class TShirtsEntity {
     public OffsetDateTime getUpdatedAt() {
         return updatedAt;
     }
-
-//    public boolean isActive() {
-//        return isActive;
-//    }
-//
-//    public void setActive(boolean active) {
-//        isActive = active;
-//    }
 }

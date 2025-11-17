@@ -75,12 +75,13 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    public ResponseEntity<TShirtsEntity> updateTShirt(@PathVariable
+    public ResponseEntity<TShirtsInfoDTO> updateTShirt(@PathVariable
                                                       @Validated
                                                       @Parameter(description = "id футболки") String id,
                                                       @RequestBody @Valid TShirtUpdateDTO dto) {
         TShirtsEntity updated = tShirtsService.updateTShirt(id, dto);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
+        return new ResponseEntity<>(TShirtsMapper.toDto(updated), HttpStatus.OK);
+//        return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

@@ -38,7 +38,7 @@ public class TShirtService {
             }
         TShirtsEntity entity = TShirtsMapper.toEntity(dto);
         entity.setCreatedAt(OffsetDateTime.now());
-        entity.setIsActive(true);
+//        entity.setIsActive(true);
         return TShirtsMapper.toDto(tShirtsRepository.save(entity));
     }
 
@@ -136,6 +136,6 @@ public class TShirtService {
         entity.setCountryOfProduction(dto.getCountryOfProduction());
         entity.setDescription(dto.getDescription());
         entity.setPrice(dto.getPrice());
-        entity.setIsActive(dto.isActive());
+        entity.setIsActive(dto.getIsActive());
     }
 }

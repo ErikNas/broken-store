@@ -51,5 +51,6 @@ public class TShirtUpdateDTO {
 
     @JsonProperty("isActive")
     @Schema(description = "Флаг активности футболки")
-    private boolean isActive;
+    @NotNull (message = "Укажите флаг активности футболки")
+    private Boolean isActive;
 }

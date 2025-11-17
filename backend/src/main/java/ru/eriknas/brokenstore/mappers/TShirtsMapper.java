@@ -33,7 +33,7 @@ public class TShirtsMapper {
                 .countryOfProduction(dto.getCountryOfProduction())
                 .description(dto.getDescription())
                 .price(dto.getPrice())
-                .isActive(dto.isActive())
+                .isActive(dto.getIsActive())
                 .build();
     }
 }
