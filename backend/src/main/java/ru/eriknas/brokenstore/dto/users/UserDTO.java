@@ -35,12 +35,12 @@ public class UserDTO {
     @Schema(description = "Адрес проживания пользователя")
     private String address;
 
-    @Schema(description = "Электронная почта", example = "string")
-    @Email
+    @Schema(description = "Электронная почта",  example = "user@example.com", format = "email")
     @NotNull(message = "email: Не может быть пустым")
     @Pattern(message = "email: Электронная почта должна состоять из двух частей, разделенных @:" +
             "левая часть — логин, имя пользователя - это текст, который может содержать буквы (A-Z, a-z) и цифры (0-9)," +
-            " правая часть — доменное имя", regexp = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,}$")
+            " правая часть — доменное имя",
+            regexp = "^[a-zA-Z0-9][a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\\\\.[a-zA-Z]{2,}$")
     private String email;
 
     @Schema(description = "Пароль", example = "string")

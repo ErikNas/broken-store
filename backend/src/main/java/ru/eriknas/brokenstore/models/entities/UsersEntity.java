@@ -2,6 +2,7 @@ package ru.eriknas.brokenstore.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class UsersEntity {
     private Integer id;
 
     @Column(name = "email", unique = true)
+    @Email(message = "email: Некорректный формат электронной почты")
     private String email;
 
     @Column(name = "first_name")
