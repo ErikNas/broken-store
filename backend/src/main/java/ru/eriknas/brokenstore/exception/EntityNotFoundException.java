@@ -1,0 +1,7 @@
+package ru.eriknas.brokenstore.exception;
+
+public class EntityNotFoundException extends RuntimeException {
+    public EntityNotFoundException(String message) {
+        super(message);
+    }
+}
