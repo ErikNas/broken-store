@@ -66,6 +66,13 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 docker compose up -d
 ```
 
+При разработке и тестировании рекомендуется запускать с указанием опции --build. 
+В данном случае образы сервисов (у которых есть блок build в docker-compose.yml) будут собираться заново
+```Bash
+docker compose up --build -d
+```
+
+
 Результаты успешного выполнения команды:
 ```Bash
 [+] Running 5/5
