@@ -25,5 +25,4 @@ public class BrokenStoreApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BrokenStoreApplication.class, args);
 	}
-
 }

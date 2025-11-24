@@ -40,7 +40,7 @@ public class TShirtService {
             }
         TShirtsEntity entity = TShirtsMapper.toEntity(dto);
         entity.setCreatedAt(OffsetDateTime.now());
-        entity.setActive(true);
+//        entity.setIsActive(true);
         return TShirtsMapper.toDto(tShirtsRepository.save(entity));
     }
 
@@ -71,16 +71,46 @@ public class TShirtService {
                 .orElseThrow(() -> new EntityNotFoundException("Футболка ID" + id + "не найдена"));
     }
 
-    public Page<TShirtsEntity> getAllTShirts(int page, int size, boolean isActive) {
+//    public Page<TShirtsEntity> getAllTShirts(int page, int size, boolean isActive) {
+//
+//        if (page < 0) {
+//            throw new InvalidPageSizeException(INVALID_PAGE);
+//        }
+//        if (size <= 0) {
+//            throw new InvalidPageSizeException(INVALID_SIZE);
+//        }
+//
+//        return tShirtsRepository.findByIsActive(isActive, PageRequest.of(page, size));
+//    }
 
+    // Метод без фильтра по isActive - возвращает ВСЕ футболки
+    public Page<TShirtsEntity> getAllTShirts(int page, int size) {
+        System.out.println("DEBUG: Service - fetching ALL t-shirts from DB (page: " + page + ", size: " + size + ")."); // DEBUG
         if (page < 0) {
-            throw new InvalidPageSizeException(INVALID_PAGE);
+            throw new InvalidPageSizeException(INVALID_PAGE); // <-- Убедитесь, что этот исключение правильно обрабатывается глобально
         }
-        if (size <= 0) {
-            throw new InvalidPageSizeException(INVALID_SIZE);
+        if (size <= 0) { // <-- Обратите внимание на <= 0, а не < 1
+            throw new InvalidPageSizeException(INVALID_SIZE); // <-- Убедитесь, что этот исключение правильно обрабатывается глобально
         }
+        // Вызов findAll возвращает все сущности, независимо от isActive
+        Page<TShirtsEntity> result = tShirtsRepository.findAll(PageRequest.of(page, size));
+        System.out.println("DEBUG: Service - Fetched page from DB. Content size: " + result.getContent().size()); // DEBUG
+        return result;
+    }
 
-        return tShirtsRepository.findByIsActive(isActive, PageRequest.of(page, size));
+    // Метод с фильтром по isActive - возвращает только футболки с указанным статусом
+    public Page<TShirtsEntity> getAllTShirts(int page, int size, boolean isActive) {
+        System.out.println("DEBUG: Service - fetching t-shirts with isActive=" + isActive + " from DB (page: " + page + ", size: " + size + ")."); // DEBUG
+        if (page < 0) {
+            throw new InvalidPageSizeException(INVALID_PAGE); // <-- Убедитесь, что этот исключение правильно обрабатывается глобально
+        }
+        if (size <= 0) { // <-- Обратите внимание на <= 0, а не < 1
+            throw new InvalidPageSizeException(INVALID_SIZE); // <-- Убедитесь, что этот исключение правильно обрабатывается глобально
+        }
+        // Вызов findByIsActive возвращает только сущности с указанным isActive
+        Page<TShirtsEntity> result = tShirtsRepository.findByIsActive(isActive, PageRequest.of(page, size));
+        System.out.println("DEBUG: Service - Fetched page from DB. Content size: " + result.getContent().size()); // DEBUG
+        return result;
     }
 
     private int parseId(String id) {
@@ -113,6 +143,6 @@ public class TShirtService {
         entity.setCountryOfProduction(dto.getCountryOfProduction());
         entity.setDescription(dto.getDescription());
         entity.setPrice(dto.getPrice());
-        entity.setActive(dto.isActive());
+        entity.setIsActive(dto.getIsActive());
     }
 }

@@ -25,7 +25,8 @@ public class TShirtsMapper {
                 .countryOfProduction(entity.getCountryOfProduction())
                 .description(entity.getDescription())
                 .price(entity.getPrice())
-                .isActive(entity.isActive())
+                .isActive(entity.getIsActive() != null ? entity.getIsActive() : true)
+                //.isActive(entity.isActive())
                 .createdAt(entity.getCreatedAt().toInstant())
                 .updatedAt(entity.getUpdatedAt().toInstant())
                 .build();
@@ -43,7 +44,7 @@ public class TShirtsMapper {
                 .countryOfProduction(dto.getCountryOfProduction())
                 .description(dto.getDescription())
                 .price(dto.getPrice())
-                .isActive(dto.isActive())
+                .isActive(dto.getIsActive())
                 .build();
     }
 }

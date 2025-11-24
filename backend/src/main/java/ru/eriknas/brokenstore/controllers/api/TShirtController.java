@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,12 +79,13 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    public ResponseEntity<TShirtsEntity> updateTShirt(@PathVariable
+    public ResponseEntity<TShirtsInfoDTO> updateTShirt(@PathVariable
                                                       @Validated
                                                       @Parameter(description = "id футболки") String id,
                                                       @RequestBody @Valid TShirtUpdateDTO dto) {
         TShirtsEntity updated = tShirtsService.updateTShirt(id, dto);
-        return new ResponseEntity<>(updated, HttpStatus.OK);
+        return new ResponseEntity<>(TShirtsMapper.toDto(updated), HttpStatus.OK);
+//        return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -136,19 +138,59 @@ public class TShirtController {
                                                                     @RequestParam(required = false, defaultValue = "10")
                                                                     @Parameter(description = "min: 1")
                                                                     @Validated @Min(1) int size,
-                                                                    @RequestParam(required = false, defaultValue = "true")
-                                                                        @Parameter(description = "Флаг активности")
-                                                                        boolean isActive) {
+                                                                    @RequestParam(required = false)
+                                                                    @Parameter(description = "Фильтр по статусу активности: true - активные, false - неактивные, если параметр не указан или пуст - все")
+                                                                    String isActiveFilter) {
+
+        System.out.println("DEBUG: Controller received - page: " + page + ", size: " + size + ", isActiveFilter: '" + isActiveFilter + "'"); // DEBUG
 
         if (page < 0 || size < 1) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Collection<TShirtsInfoDTO> tShirts = tShirtsService.getAllTShirts(page, size, isActive)
-                .getContent()
+
+//        Collection<TShirtsInfoDTO> tShirts = tShirtsService.getAllTShirts(page, size, isActive)
+//                .getContent()
+//                .stream()
+//                .map(TShirtsMapper::toDto)
+//                .collect(Collectors.toList());
+
+        Collection<TShirtsInfoDTO> tShirts;
+        Page<TShirtsEntity> pageResult;
+
+        // Проверяем, был ли параметр isActiveFilter передан и не пустой ли он
+        if (isActiveFilter == null || isActiveFilter.trim().isEmpty()) {
+            System.out.println("DEBUG: Controller - isActiveFilter is null or empty, fetching ALL t-shirts."); // DEBUG
+            // Если фильтр не выбран (не передан или пуст), получаем все записи (и isActive=true, и isActive=false)
+            pageResult = tShirtsService.getAllTShirts(page, size); // Вызываем метод без фильтра
+        } else {
+            // Пытаемся распарсить строку в boolean
+            boolean parsedIsActive;
+            try {
+                // parseBoolean сам обработает "true"/"false" независимо от регистра
+                parsedIsActive = Boolean.parseBoolean(isActiveFilter.toLowerCase());
+                // Проверим, действительно ли строка была "true" или "false", а не что-то другое
+                if (!"true".equalsIgnoreCase(isActiveFilter) && !"false".equalsIgnoreCase(isActiveFilter)) {
+                    System.out.println("DEBUG: Controller - Invalid value for isActiveFilter: " + isActiveFilter); // DEBUG
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                }
+            } catch (Exception e) { // Ловим любое исключение при парсинге
+                System.out.println("DEBUG: Controller - Exception parsing isActiveFilter: " + e.getMessage()); // DEBUG
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            System.out.println("DEBUG: Controller - isActiveFilter is " + parsedIsActive + ", fetching filtered t-shirts."); // DEBUG
+            // Если фильтр выбран (true или false), получаем только соответствующие
+            pageResult = tShirtsService.getAllTShirts(page, size, parsedIsActive); // Вызываем метод с фильтром
+        }
+
+        // Проверяем результат из сервиса
+        System.out.println("DEBUG: Controller - Page result size: " + pageResult.getContent().size() + ", Total elements: " + pageResult.getTotalElements()); // DEBUG
+
+        tShirts = pageResult.getContent()
                 .stream()
-                .map(TShirtsMapper::toDto)
+                .map(TShirtsMapper::toDto) // <-- Ошибка может быть здесь, если что-то не так с сущностью или маппером
                 .collect(Collectors.toList());
+
 
         if (tShirts.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
