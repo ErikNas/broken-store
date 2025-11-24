@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @Builder
@@ -48,6 +50,10 @@ public class TShirtsEntity {
     @Column(name = "price")
     private Double price;
 
+    @JsonProperty("isActive")
+    @Column(name = "is_active")
+    private boolean isActive = true;
+
     @Column(name = "archived_at")
     private OffsetDateTime archivedAt;
 
@@ -56,6 +62,7 @@ public class TShirtsEntity {
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
 
     @PrePersist
     public void onCreate() {
@@ -81,5 +88,13 @@ public class TShirtsEntity {
     @JsonProperty("updated_At")
     public OffsetDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

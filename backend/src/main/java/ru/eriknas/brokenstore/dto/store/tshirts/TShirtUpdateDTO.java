@@ -1,5 +1,6 @@
 package ru.eriknas.brokenstore.dto.store.tshirts;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -47,4 +48,8 @@ public class TShirtUpdateDTO {
     @NotNull(message = "Укажите цену футболки")
     @Min(value = 0, message = "Цена не может быть отрицательная")
     private Double price;
+
+    @JsonProperty("isActive")
+    @Schema(description = "Флаг активности футболки")
+    private boolean isActive;
 }

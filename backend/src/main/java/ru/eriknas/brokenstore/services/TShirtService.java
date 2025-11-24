@@ -40,6 +40,7 @@ public class TShirtService {
             }
         TShirtsEntity entity = TShirtsMapper.toEntity(dto);
         entity.setCreatedAt(OffsetDateTime.now());
+        entity.setActive(true);
         return TShirtsMapper.toDto(tShirtsRepository.save(entity));
     }
 
@@ -53,12 +54,15 @@ public class TShirtService {
 
     public void deleteTShirt(String id) {
         int idInt = parseId(id);
-        findTShirtById(idInt);
-        try {
-            tShirtsRepository.deleteById(idInt);
-        } catch (DataIntegrityViolationException ex) {
-            throw new ValidationException("Невозможно удалить футболку, так как она используется в заказе");
-        }
+        TShirtsEntity entity = findTShirtById(idInt);
+        entity.setActive(false);
+        entity.setArchivedAt(OffsetDateTime.now());
+        tShirtsRepository.save(entity);
+//        try {
+//            tShirtsRepository.deleteById(idInt);
+//        } catch (DataIntegrityViolationException ex) {
+//            throw new ValidationException("Невозможно удалить футболку, так как она используется в заказе");
+//        }
     }
 
     public TShirtsEntity getTShirtById(String id) {
@@ -67,7 +71,7 @@ public class TShirtService {
                 .orElseThrow(() -> new EntityNotFoundException("Футболка ID" + id + "не найдена"));
     }
 
-    public Page<TShirtsEntity> getAllTShirts(int page, int size) {
+    public Page<TShirtsEntity> getAllTShirts(int page, int size, boolean isActive) {
 
         if (page < 0) {
             throw new InvalidPageSizeException(INVALID_PAGE);
@@ -76,7 +80,7 @@ public class TShirtService {
             throw new InvalidPageSizeException(INVALID_SIZE);
         }
 
-        return tShirtsRepository.findAll(PageRequest.of(page, size));
+        return tShirtsRepository.findByIsActive(isActive, PageRequest.of(page, size));
     }
 
     private int parseId(String id) {
@@ -109,5 +113,6 @@ public class TShirtService {
         entity.setCountryOfProduction(dto.getCountryOfProduction());
         entity.setDescription(dto.getDescription());
         entity.setPrice(dto.getPrice());
+        entity.setActive(dto.isActive());
     }
 }

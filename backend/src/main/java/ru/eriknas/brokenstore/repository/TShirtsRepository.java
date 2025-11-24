@@ -9,4 +9,6 @@ public interface TShirtsRepository extends CrudRepository<TShirtsEntity, Integer
     boolean existsById(Integer id);
 
     Page<TShirtsEntity> findAll(Pageable pageable);
+
+    Page<TShirtsEntity> findByIsActive(boolean isActive, Pageable pageable);
 }

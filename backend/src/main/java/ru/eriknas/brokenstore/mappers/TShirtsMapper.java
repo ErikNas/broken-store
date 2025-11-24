@@ -1,12 +1,19 @@
 package ru.eriknas.brokenstore.mappers;
 
+import org.jetbrains.annotations.Contract;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtCreateDTO;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtsInfoDTO;
 import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 public class TShirtsMapper {
 
     public static TShirtsInfoDTO toDto(TShirtsEntity entity) {
+
         return TShirtsInfoDTO.builder()
                 .id(entity.getId())
                 .article(entity.getArticle())
@@ -18,7 +25,11 @@ public class TShirtsMapper {
                 .countryOfProduction(entity.getCountryOfProduction())
                 .description(entity.getDescription())
                 .price(entity.getPrice())
+                .isActive(entity.isActive())
+                .createdAt(entity.getCreatedAt().toInstant())
+                .updatedAt(entity.getUpdatedAt().toInstant())
                 .build();
+
     }
 
     public static TShirtsEntity toEntity(TShirtCreateDTO dto) {
@@ -32,6 +43,7 @@ public class TShirtsMapper {
                 .countryOfProduction(dto.getCountryOfProduction())
                 .description(dto.getDescription())
                 .price(dto.getPrice())
+                .isActive(dto.isActive())
                 .build();
     }
 }

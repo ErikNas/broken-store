@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtCreateDTO;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtUpdateDTO;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtsInfoDTO;
-
-import org.springframework.web.multipart.MultipartFile;
 import ru.eriknas.brokenstore.mappers.TShirtsMapper;
 import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
 import ru.eriknas.brokenstore.services.MinioService;
@@ -30,7 +30,8 @@ import ru.eriknas.brokenstore.services.TShirtService;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequestMapping("/t-shirt")
@@ -94,7 +95,7 @@ public class TShirtController {
     public ResponseEntity<Void> deleteTShirt(@PathVariable
                                              @Validated
                                              @Parameter(description = "id футболки") String id) throws Exception {
-        TShirtsEntity tShirt = tShirtsService.getTShirtById(id);
+        TShirtsInfoDTO tShirt = tShirtsService.getTShirtById(id);
         tShirtsService.deleteTShirt(id);
         minioService.removeFile(tShirt.getImage());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -124,23 +125,28 @@ public class TShirtController {
         }
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all") 
     @Operation(summary = "Получить список всех футболок")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
     public ResponseEntity<Collection<TShirtsInfoDTO>> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
-                                                @Parameter(description = "min: 0")
-                                                @Validated @Min(0) int page,
-                                                @RequestParam(required = false, defaultValue = "10")
-                                                @Parameter(description = "min: 1")
-                                                @Validated @Min(1) int size) {
+                                                                    @Parameter(description = "min: 0")
+                                                                    @Validated @Min(0) int page,
+                                                                    @RequestParam(required = false, defaultValue = "10")
+                                                                    @Parameter(description = "min: 1")
+                                                                    @Validated @Min(1) int size,
+                                                                    @RequestParam(required = false, defaultValue = "true")
+                                                                        @Parameter(description = "Флаг активности")
+                                                                        boolean isActive) {
+
         if (page < 0 || size < 1) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Collection<TShirtsInfoDTO> tShirts = tShirtsService.getAllTShirts(page, size)
-                .get()
+        Collection<TShirtsInfoDTO> tShirts = tShirtsService.getAllTShirts(page, size, isActive)
+                .getContent()
+                .stream()
                 .map(TShirtsMapper::toDto)
                 .collect(Collectors.toList());
 
