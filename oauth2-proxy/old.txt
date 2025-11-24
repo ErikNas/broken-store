@@ -1,0 +1,16 @@
+    command: [
+        # "--provider=keycloak",
+        # "--client-id=nginx-gateway",
+        # "--oidc-issuer-url=http://keycloak:8080/realms/broken-store-realm",
+        "--oidc-extra-audience=broken-store-client",  # разрешить токены от другого клиента
+        "--skip-jwt-bearer-tokens=true",
+        "--skip-provider-button=true",
+        # "--http-address=0.0.0.0:4180",
+        "--set-authorization-header=true",
+        "--pass-authorization-header=true",
+
+        # Обязательные параметры (даже если не используются)
+        # "--cookie-secret=secretsecretsecr",             # cookie_secret must be 16, 24, or 32 bytes (или base64)
+        # "--client-secret=6S4nbOfc26q10mlqzZB70SbdLm5r3H3H", # пусто для bearer-only
+        # "--email-domain=*"                                  # разрешить все email
+    ]

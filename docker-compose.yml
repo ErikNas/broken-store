@@ -1,12 +1,14 @@
 services:
   client-backend:
-    image: client:0.0.13
+    image: client:0.0.14
     container_name: broken-store-client-backend
     build:
       context: .
       dockerfile: ./backend.dockerfile
-    ports:
-      - "8085:8080"
+    # ports:
+      # - "8085:8080"
+    expose:
+      - "8080"
     depends_on:
       - service-db
     environment:
@@ -147,6 +149,7 @@ services:
 
   minio-settings:
     image: minio/mc
+    container_name: broken-store-minio-settings
     depends_on:
       - minio
     environment:
@@ -169,28 +172,57 @@ services:
     command:
       -v start-dev --import-realm
     ports:
-      - 8082:8080
+       - 8082:8082
     volumes:
       - ./keycloak/:/opt/keycloak/data/import
     #  - ./h2:/opt/keycloak/data/h2
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_PASSWORD:-admin}
-      KC_HTTP_PORT: 8080
-      KC_HOSTNAME_URL: http://localhost:8080
-      KC_HOSTNAME_ADMIN_URL: http://localhost:8080
+      KC_HTTP_PORT: 8082
+      KC_HOSTNAME_URL: http://localhost:8082
+      KC_HOSTNAME_ADMIN_URL: http://localhost:8082
       KC_HOSTNAME_STRICT_BACKCHANNEL: true
-      KC_HTTP_RELATIVE_PATH: /
+      # KC_HTTP_RELATIVE_PATH: /
       KC_HTTP_ENABLED: true
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:8080/auth/health/live']
+      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { java.net.URI uri = java.net.URI.create(args[0]); System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)uri.toURL().openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/health/live']
       interval: 5s
       timeout: 5s
       retries: 20
+
+  nginx-gateway:
+    image: nginx:1.25
+    container_name: broken-store-nginx-gateway
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    environment:
+      - FRONTEND_HOST=${FRONTEND_HOST:-localhost}
+      - AUTH_HOST=${AUTH_HOST:-localhost}
+    volumes:
+      - ./nginx-gateway/nginx.conf.template:/etc/nginx/nginx.conf.template
+      - ./nginx-gateway/nginx-docker-entrypoint.sh:/docker-entrypoint.sh  # монтируем скрипт
+    command: /docker-entrypoint.sh
+    depends_on:
+      - client-backend
+      - oauth2-proxy
+      - keycloak
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+    container_name: broken-store-oauth2-proxy
+    ports:
+      - 4180:4180/tcp
+    volumes:
+      - "./oauth2-proxy/oauth2-proxy.cfg:/oauth2-proxy.cfg"
+    command: --config /oauth2-proxy.cfg
+    depends_on:
+      keycloak:
+        condition: service_healthy
 
 volumes:
   db-data:
