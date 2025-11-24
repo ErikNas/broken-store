@@ -1,6 +1,8 @@
 package ru.eriknas.brokenstore.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -60,7 +62,9 @@ public class TShirtService {
     }
 
     public TShirtsEntity getTShirtById(String id) {
-        return findTShirtById(parseId(id));
+        //добавлена проверка ввода пустого значения
+        return tShirtsRepository.findById(Integer.valueOf(id))
+                .orElseThrow(() -> new EntityNotFoundException("Футболка ID" + id + "не найдена"));
     }
 
     public Page<TShirtsEntity> getAllTShirts(int page, int size) {
