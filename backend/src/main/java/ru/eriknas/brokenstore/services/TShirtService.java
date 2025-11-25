@@ -55,7 +55,7 @@ public class TShirtService {
     public void deleteTShirt(String id) {
         int idInt = parseId(id);
         TShirtsEntity entity = findTShirtById(idInt);
-        entity.setActive(false);
+        entity.setIsActive(false);
         entity.setArchivedAt(OffsetDateTime.now());
         tShirtsRepository.save(entity);
 //        try {
