@@ -1,12 +1,13 @@
 services:
-  client-backend:
-    image: client:0.0.14
-    container_name: broken-store-client-backend
+
+  backend-service:
+    image: backend-service:0.0.15
+    container_name: broken-store-backend-service
     build:
       context: .
-      dockerfile: ./backend.dockerfile
-    # ports:
-      # - "8085:8080"
+      dockerfile: ./backend/backend-service/backend-service.dockerfile
+#    ports:
+#      - "8085:8080"
     expose:
       - "8080"
     depends_on:
@@ -21,6 +22,37 @@ services:
       # - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring boot-ddl-auto-generator
       - SPRING_JPA_HIBERNATE_DDL_AUTO=create # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-
       - MINIO_URL=minio
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  user-service:
+    image: user-service:0.0.1
+    container_name: broken-store-user-service
+    build:
+      context: .
+      dockerfile: ./backend/user-service/user-service.dockerfile
+    ports:
+      - "8086:8080"
+    depends_on:
+      - service-db
+      - keycloak
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/broken_store
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-admin}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring boot-ddl-auto-generator
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=create # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-
+      - SPRING_JPA_GENERATE_DDL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+      - KC_SERVER_URL=http://keycloak:8082
+
     deploy:
       resources:
         limits:
@@ -121,7 +153,7 @@ services:
     command:
       - "-port=8081"
     depends_on:
-      - client-backend
+      - backend-service
     deploy:
       resources:
         limits:
@@ -129,7 +161,7 @@ services:
           memory: 512M
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-01-20T14-49-07Z
     container_name: broken-store-minio
     restart: unless-stopped
     command: server --console-address ":9001" /data/
@@ -148,7 +180,7 @@ services:
     #   retries: 3
 
   minio-settings:
-    image: minio/mc
+    image: minio/mc:RELEASE.2025-03-12T17-29-24Z
     container_name: broken-store-minio-settings
     depends_on:
       - minio
@@ -162,7 +194,7 @@ services:
       /bin/sh -c "
       sleep 5;
       /usr/bin/mc config host add myminio http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
-      /usr/bin/mc admin accesskey create myminio/ minio_admin --access-key $$MINIO_ACCESS_KEY --secret-key $$MINIO_SECRET_KEY;
+      /usr/bin/mc admin accesskey create myminio/ $$MINIO_ROOT_USER --access-key $$MINIO_ACCESS_KEY --secret-key $$MINIO_SECRET_KEY;
       exit 0;
       "
 
@@ -172,19 +204,23 @@ services:
     command:
       -v start-dev --import-realm
     ports:
-       - 8082:8082
+      - 8082:8082
+      - 8443:8443
     volumes:
       - ./keycloak/:/opt/keycloak/data/import
-    #  - ./h2:/opt/keycloak/data/h2
     environment:
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/data/import/server.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/data/import/server.key
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_PASSWORD:-admin}
-      KC_HTTP_PORT: 8082
       KC_HOSTNAME_URL: http://localhost:8082
       KC_HOSTNAME_ADMIN_URL: http://localhost:8082
       KC_HOSTNAME_STRICT_BACKCHANNEL: true
-      # KC_HTTP_RELATIVE_PATH: /
+      KC_HTTP_RELATIVE_PATH: /
+      KC_HTTP_PORT: 8082
+      KC_HTTPS_PORT: 8443
       KC_HTTP_ENABLED: true
+      KC_HTTPS_ENABLED: true
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
     extra_hosts:
