@@ -2,9 +2,7 @@ package ru.eriknas.brokenstore.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -55,7 +53,7 @@ public class TShirtService {
     public void deleteTShirt(String id) {
         int idInt = parseId(id);
         TShirtsEntity entity = findTShirtById(idInt);
-        entity.setActive(false);
+        entity.setIsActive(false);
         entity.setArchivedAt(OffsetDateTime.now());
         tShirtsRepository.save(entity);
 //        try {
