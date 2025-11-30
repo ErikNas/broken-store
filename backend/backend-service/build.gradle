@@ -7,17 +7,5 @@ version = '0.0.1-SNAPSHOT'
 
 dependencies {
     implementation project(':core')
+    implementation project(':core-security')
 }
-//
-//repositories {
-//    mavenCentral()
-//}
-//
-//dependencies {
-//    testImplementation platform('org.junit:junit-bom:5.9.1')
-//    testImplementation 'org.junit.jupiter:junit-jupiter'
-//}
-//
-//test {
-//    useJUnitPlatform()
-//}

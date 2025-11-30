@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +57,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<?> createTShirt(@RequestBody @Validated TShirtCreateDTO dto,
                                           @RequestPart(value = "picture", required = false) MultipartFile picture) {
         TShirtsInfoDTO created = tShirtsService.createTShirt(dto);
@@ -80,6 +82,7 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<TShirtsInfoDTO> updateTShirt(@PathVariable
                                                       @Validated
                                                       @Parameter(description = "id футболки") String id,
@@ -95,6 +98,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteTShirt(@PathVariable
                                              @Validated
                                              @Parameter(description = "id футболки") String id) throws Exception {
@@ -110,8 +114,7 @@ public class TShirtController {
     @ApiResponse(responseCode = "400 BadRequest", description = "ID футболки не может быть пустым")
             @ApiResponse(responseCode = "404 NotFound",description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
-
-
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> getTShirtById(@PathVariable
                                                        @Validated
                                                        @NotBlank
@@ -128,11 +131,12 @@ public class TShirtController {
         }
     }
 
-    @GetMapping("/all") 
+    @GetMapping("/all")
     @Operation(summary = "Получить список всех футболок")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<Collection<TShirtsInfoDTO>> getAllTShirts(@RequestParam(required = false, defaultValue = "0")
                                                                     @Parameter(description = "min: 0")
                                                                     @Validated @Min(0) int page,

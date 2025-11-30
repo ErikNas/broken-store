@@ -49,7 +49,7 @@ public class UserController {
     @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) throws Exception {
         if (!isValidPassword(dto.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -76,13 +76,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Найти пользователя по id")
+//    @ApiResponse(responseCode = "200 OK")
+    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "404", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
-    @Operation(summary = "Найти пользователя по id")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
+//    public ResponseEntity<UsersEntity> getUsersById(@PathVariable
     public ResponseEntity<UserDTO> getUsersById(@PathVariable
-                                                @Validated
-                                                @Parameter(description = "id пользователя") int id) {
+                                                    @Validated
+                                                    @Parameter(description = "id пользователя") int id) {
+//        UsersEntity dto = usersService.getUsersById(id);
+//        return new ResponseEntity<>(dto, HttpStatus.OK);
         UsersEntity usersEntity = usersService.getUsersById(id);
         UserDTO userDTO = UsersMapper.toDto(usersEntity);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
@@ -91,6 +96,8 @@ public class UserController {
     @GetMapping("/all")
     @Operation(summary = "Получить список всех сотрудников")
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
+//    @ApiResponse(responseCode = "200 OK")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public Collection<UserDTO> getAllUsers(@RequestParam(required = false, defaultValue = "0")
                                            @Parameter(description = "min: 0")
                                            @Validated @Min(0) int page,
