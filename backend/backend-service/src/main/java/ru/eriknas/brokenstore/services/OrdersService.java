@@ -4,19 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
+import ru.eriknas.brokenstore.components.UsersServiceComponent;
 import ru.eriknas.brokenstore.dto.store.orders.OrderDTO;
 import ru.eriknas.brokenstore.dto.store.orders.OrderInfoDTO;
 import ru.eriknas.brokenstore.dto.store.orders.TShirtOrderDTO;
-import ru.eriknas.brokenstore.models.entities.OrdersEntity;
-import ru.eriknas.brokenstore.models.entities.TShirtOrdersEntity;
 import ru.eriknas.brokenstore.exception.InvalidPageSizeException;
 import ru.eriknas.brokenstore.exception.NotFoundException;
 import ru.eriknas.brokenstore.exception.ValidationException;
 import ru.eriknas.brokenstore.mappers.OrdersMapper;
+import ru.eriknas.brokenstore.models.entities.OrdersEntity;
+import ru.eriknas.brokenstore.models.entities.TShirtOrdersEntity;
 import ru.eriknas.brokenstore.models.entities.TShirtsEntity;
 import ru.eriknas.brokenstore.repository.OrdersRepository;
 import ru.eriknas.brokenstore.repository.TShirtsRepository;
-import ru.eriknas.brokenstore.repository.UsersRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -29,18 +30,20 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
     private final TShirtsRepository tShirtsRepository;
-    private final UsersRepository usersRepository;
+    private final UsersServiceComponent usersServiceClient;
 
     @Autowired
-    public OrdersService(OrdersRepository repository, TShirtsRepository tShirtsRepository, UsersRepository usersRepository) {
+    public OrdersService(OrdersRepository repository,
+                         TShirtsRepository tShirtsRepository,
+                         UsersServiceComponent usersServiceClient) {
         this.ordersRepository = repository;
         this.tShirtsRepository = tShirtsRepository;
-        this.usersRepository = usersRepository;
+        this.usersServiceClient = usersServiceClient;
     }
 
     // Метод валидации пользователя
-    private void validateUserExists(int userId) {
-        if (!usersRepository.existsById(userId)) {
+    private void validateUserExists(int userId) throws RestClientResponseException {
+        if (!usersServiceClient.getUser(userId).getStatusCode().is2xxSuccessful()) {
             throw new NotFoundException(String.format(USER_NOT_FOUND, userId));
         }
     }

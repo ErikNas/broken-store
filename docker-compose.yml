@@ -244,7 +244,7 @@ services:
       - ./nginx-gateway/nginx-docker-entrypoint.sh:/docker-entrypoint.sh  # монтируем скрипт
     command: /docker-entrypoint.sh
     depends_on:
-      - client-backend
+      - backend-service
       - oauth2-proxy
       - keycloak
 

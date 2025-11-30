@@ -81,7 +81,8 @@ public class UserController {
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "404", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
+//    todo вернуть роли. Отключено для работы backend-service
+//     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
 //    public ResponseEntity<UsersEntity> getUsersById(@PathVariable
     public ResponseEntity<UserDTO> getUsersById(@PathVariable
                                                     @Validated

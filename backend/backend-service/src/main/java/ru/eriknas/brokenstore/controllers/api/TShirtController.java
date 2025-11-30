@@ -102,7 +102,7 @@ public class TShirtController {
     public ResponseEntity<Void> deleteTShirt(@PathVariable
                                              @Validated
                                              @Parameter(description = "id футболки") String id) throws Exception {
-        TShirtsInfoDTO tShirt = tShirtsService.getTShirtById(id);
+        TShirtsEntity tShirt = tShirtsService.getTShirtById(id);
         tShirtsService.deleteTShirt(id);
         minioService.removeFile(tShirt.getImage());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
