@@ -6,10 +6,10 @@ services:
     build:
       context: .
       dockerfile: ./backend/backend-service/backend-service.dockerfile
-#    ports:
-#      - "8085:8080"
-    expose:
-      - "8080"
+    ports:
+      - "8085:8080"
+#    expose:
+#      - "8080"
     depends_on:
       - service-db
     environment:
@@ -22,6 +22,7 @@ services:
       # - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring boot-ddl-auto-generator
       - SPRING_JPA_HIBERNATE_DDL_AUTO=create # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-
       - MINIO_URL=minio
+      - PROFANITY_VALIDATOR_SERVICE_URL=http://profanity-validator-service:8080
     deploy:
       resources:
         limits:
@@ -52,7 +53,24 @@ services:
       - SPRING_JPA_GENERATE_DDL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - KC_SERVER_URL=http://keycloak:8082
+      - PROFANITY_VALIDATOR_SERVICE_URL=http://profanity-validator-service:8080
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
 
+  profanity-validator-service:
+    image: profanity-validator-service:0.0.1
+    container_name: broken-store-profanity-validator-service
+    build:
+      context: .
+      dockerfile: ./backend-python/profanity-validator-service/profanity-validator-service.dockerfile
+    ports:
+      - "8087:8080"
     deploy:
       resources:
         limits:

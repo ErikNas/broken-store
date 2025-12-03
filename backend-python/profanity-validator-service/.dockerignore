@@ -1,0 +1,2 @@
+.venv/
+!.venv/lib/nltk_data/corpora/stopwords/russian

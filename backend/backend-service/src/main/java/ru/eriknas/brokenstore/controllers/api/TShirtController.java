@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.eriknas.brokenstore.components.profanityValidator.ProfanityValidatorServiceComponent;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtCreateDTO;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtUpdateDTO;
 import ru.eriknas.brokenstore.dto.store.tshirts.TShirtsInfoDTO;
@@ -44,11 +45,13 @@ public class TShirtController {
 
     private final TShirtService tShirtsService;
     private final MinioService minioService;
+    private final ProfanityValidatorServiceComponent profanityValidatorService;
 
     @Autowired
-    public TShirtController(TShirtService tShirtsService, MinioService minioService) {
+    public TShirtController(TShirtService tShirtsService, MinioService minioService, ProfanityValidatorServiceComponent profanityValidatorService) {
         this.tShirtsService = tShirtsService;
         this.minioService = minioService;
+        this.profanityValidatorService = profanityValidatorService;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,6 +63,7 @@ public class TShirtController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<?> createTShirt(@RequestBody @Validated TShirtCreateDTO dto,
                                           @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        profanityValidatorService.validateProfanity(dto.toString());
         TShirtsInfoDTO created = tShirtsService.createTShirt(dto);
 
         String fileNameInMinio;
@@ -84,9 +88,10 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<TShirtsInfoDTO> updateTShirt(@PathVariable
-                                                      @Validated
-                                                      @Parameter(description = "id футболки") String id,
-                                                      @RequestBody @Valid TShirtUpdateDTO dto) {
+                                                       @Validated
+                                                       @Parameter(description = "id футболки") String id,
+                                                       @RequestBody @Valid TShirtUpdateDTO dto) {
+        profanityValidatorService.validateProfanity(dto.toString());
         TShirtsEntity updated = tShirtsService.updateTShirt(id, dto);
         return new ResponseEntity<>(TShirtsMapper.toDto(updated), HttpStatus.OK);
 //        return new ResponseEntity<>(updated, HttpStatus.OK);
@@ -112,21 +117,21 @@ public class TShirtController {
     @Operation(summary = "Найти футболку по id")
     @ApiResponse(responseCode = "200 OK")
     @ApiResponse(responseCode = "400 BadRequest", description = "ID футболки не может быть пустым")
-            @ApiResponse(responseCode = "404 NotFound",description = "Футболка не найдена",
+    @ApiResponse(responseCode = "404 NotFound", description = "Футболка не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> getTShirtById(@PathVariable
-                                                       @Validated
-                                                       @NotBlank
-                                                       @Parameter(description = "id футболки") String id) {
+                                           @Validated
+                                           @NotBlank
+                                           @Parameter(description = "id футболки") String id) {
         //добавлена проверка на пустой ввод ID
-        if(id == null || id.trim().isEmpty()){
+        if (id == null || id.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("ID футболки не может быть пустым"); //404
         }
         try {
             TShirtsEntity dto = tShirtsService.getTShirtById(id);
             return ResponseEntity.ok(dto);
-        }catch (EntityNotFoundException ex){
+        } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }
     }

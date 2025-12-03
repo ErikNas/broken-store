@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.eriknas.brokenstore.components.profanityValidator.ProfanityValidatorServiceComponent;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
 import ru.eriknas.brokenstore.exception.EmailAlreadyExistsException;
 import ru.eriknas.brokenstore.mappers.UsersMapper;
@@ -34,11 +35,13 @@ public class UserController {
 
     private final UsersService usersService;
     private final KeycloakUserService keycloakUserService;
+    private final ProfanityValidatorServiceComponent profanityValidatorService;
 
     @Autowired
-    public UserController(UsersService usersService, KeycloakUserService keycloakUserService) {
+    public UserController(UsersService usersService, KeycloakUserService keycloakUserService, ProfanityValidatorServiceComponent profanityValidatorService) {
         this.usersService = usersService;
         this.keycloakUserService = keycloakUserService;
+        this.profanityValidatorService = profanityValidatorService;
     }
 
     @PostMapping
@@ -51,6 +54,7 @@ public class UserController {
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) throws Exception {
+        profanityValidatorService.validateProfanity(dto.toString());
         if (!isValidPassword(dto.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Error("Пароль не соответствует требованиям или содержит недопустимые символы."));

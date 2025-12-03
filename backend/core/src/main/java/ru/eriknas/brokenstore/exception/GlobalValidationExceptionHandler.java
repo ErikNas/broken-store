@@ -58,18 +58,19 @@ public class GlobalValidationExceptionHandler {
 
     //обработка пустого ID (400)
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String>handleIllegalArgument(IllegalArgumentException ex){
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
+
     //Обработка отсутствия сущности (404)
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String>handleEntityNotFound(EntityNotFoundException ex){
+    public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     //обработка некорректного URL(404)
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<String>handleNoHandlerFound(NoHandlerFoundException ex){
+    public ResponseEntity<String> handleNoHandlerFound(NoHandlerFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Некорректный URL" + ex.getRequestURL());
     }
 

@@ -111,6 +111,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ProfanityException.class)
+    public ResponseEntity<Object> handleProfanityException(ProfanityException e) {
+        var error = Error.builder()
+                .type(Error.Type.VALIDATION_ERROR)
+                .message(e.getMessage())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     @ExceptionHandler(JsonMappingException.class)
     public ResponseEntity<String> handleJsonMappingException(JsonMappingException ex) {
         return ResponseEntity.badRequest().body("Invalid request payload: " + ex.getMessage());
