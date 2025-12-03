@@ -1,0 +1,4 @@
+Flask==3.1.2
+check-swear==0.1.4 # ru
+#alt-profanity-check==1.7.2 # en
+gunicorn

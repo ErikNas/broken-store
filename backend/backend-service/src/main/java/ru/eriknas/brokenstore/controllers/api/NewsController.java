@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.eriknas.brokenstore.components.profanityValidator.ProfanityValidatorServiceComponent;
 import ru.eriknas.brokenstore.dto.store.NewsDTO;
 import ru.eriknas.brokenstore.mappers.NewsMapper;
 import ru.eriknas.brokenstore.models.entities.Error;
@@ -28,10 +29,12 @@ import java.util.stream.Collectors;
 public class NewsController {
 
     private final NewsService newsService;
+    private final ProfanityValidatorServiceComponent profanityValidatorService;
 
     @Autowired
-    public NewsController(NewsService newsService) {
+    public NewsController(NewsService newsService, ProfanityValidatorServiceComponent profanityValidatorService) {
         this.newsService = newsService;
+        this.profanityValidatorService = profanityValidatorService;
     }
 
     @PostMapping
@@ -39,8 +42,9 @@ public class NewsController {
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400 BadRequest", description = "Ошибка валидации",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
+//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
     public ResponseEntity<NewsDTO> addNews(@RequestBody @Validated NewsDTO newsDTO) {
+        profanityValidatorService.validateProfanity(newsDTO.toString());
         NewsEntity newsEntity = newsService.addNews(newsDTO);
         return new ResponseEntity<>(NewsMapper.toDto(newsEntity), HttpStatus.CREATED);
     }

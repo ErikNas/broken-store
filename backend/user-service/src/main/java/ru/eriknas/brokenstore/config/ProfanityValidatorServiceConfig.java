@@ -6,25 +6,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class UsersServiceConfig {
+public class ProfanityValidatorServiceConfig {
 
-    @Value("${user.service.url}")
+    @Value("${profanity.validator.service.url}")
     private String url;
 
-    @Value("${user.service.login}")
-    private String login;
-
-    @Value("${user.service.password}")
-    private String password;
-
-    public UsersServiceConfig() {
+    public ProfanityValidatorServiceConfig() {
     }
 
-    @Bean(name = "usersServiceClient")
-    public RestClient usersServiceClient() {
+    @Bean(name = "profanityValidatorServiceClient")
+    public RestClient profanityValidatorServiceClient() {
         return RestClient.builder()
                 .baseUrl(url)
                 .defaultHeader("Accept", "application/json")
+                .defaultHeader("Content-Type", "application/json")
                 .build();
     }
 }
