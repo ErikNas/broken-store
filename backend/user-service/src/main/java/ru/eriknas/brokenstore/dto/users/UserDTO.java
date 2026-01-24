@@ -57,6 +57,10 @@ public class UserDTO {
     private String password;
 
     @NotBlank
-    @Schema(description = "Роль пользователя")
+    @Schema(
+            description = "Роль пользователя",
+            allowableValues = {"USER", "ADMIN", "MANAGER"},
+            example = "USER or ADMIN or MANAGER"
+    )
     private String role;
 }
