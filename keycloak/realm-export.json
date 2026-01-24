@@ -548,6 +548,25 @@
   "webAuthnPolicyPasswordlessExtraOrigins": [],
   "users": [
     {
+      "username": "admin123",
+      "enabled": true,
+      "emailVerified": false,
+      "createdTimestamp": 1739099265404,
+      "firstName": "firstName",
+      "lastName": "lastName",
+      "email": "admin123@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "GROUP_ADMIN"
+      ]
+    },
+    {
       "id": "03ead78c-508c-4a58-bd68-104a393d3e8c",
       "username": "service-account-broken-store-client",
       "emailVerified": false,
