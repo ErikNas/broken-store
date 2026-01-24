@@ -49,8 +49,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-admin}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring boot-ddl-auto-generator
-#      - SPRING_JPA_HIBERNATE_DDL_AUTO=create # Careful! 'create' destroy data! https://stackoverflow.com/questions/21113154/spring-
-      - SPRING_JPA_GENERATE_DDL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - KC_SERVER_URL=http://keycloak:8082
       - PROFANITY_VALIDATOR_SERVICE_URL=http://profanity-validator-service:8080
@@ -90,7 +88,7 @@ services:
     ports:
       - "15432:5432"
     volumes:
-      #      - ./db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - ./db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
       - db-data:/var/lib/postgresql/data
     restart: unless-stopped
     deploy:
