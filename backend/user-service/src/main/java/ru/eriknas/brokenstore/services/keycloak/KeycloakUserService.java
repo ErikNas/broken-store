@@ -44,6 +44,29 @@ public class KeycloakUserService {
         return mapUser(keycloak.realm(realm).users().get(id).toRepresentation());
     }
 
+    public UserDTO findUser(String email) {
+        Keycloak keycloak = keycloakUtil.getKeycloakInstance();
+        List<UserRepresentation> representations = keycloak.realm(realm)
+                .users()
+                .searchByEmail(email, true);
+        if (representations.size() != 1) {
+            throw new IllegalArgumentException(String.format("Пользователь с email %s не найден в keycloak", email));
+        }
+        UserRepresentation userRepresentation = representations.get(0);
+        List<GroupRepresentation> groups = keycloak.realm(realm)
+                .users()
+                .get(userRepresentation.getId())
+                .groups();
+        if (groups.size() != 1) {
+            throw new IllegalArgumentException("У пользователя назначено более одной роли");
+        }
+        List<String> groupsNames = groups.stream()
+                .map(GroupRepresentation::getName)
+                .toList();
+        userRepresentation.setGroups(groupsNames);
+        return mapUser(userRepresentation);
+    }
+
     public Response addUser(UserDTO user) throws Exception {
         Map<String, String> roleGroups = getRoleGroups();
 
@@ -112,10 +135,10 @@ public class KeycloakUserService {
 
     private UserDTO mapUser(UserRepresentation userRep) {
         return UserDTO.builder()
-                .id(Integer.valueOf(userRep.getId()))
                 .firstName(userRep.getFirstName())
                 .lastName(userRep.getLastName())
                 .email(userRep.getEmail())
+                .role(userRep.getGroups().get(0).replace(rolePrefix, ""))
                 .build();
     }
 

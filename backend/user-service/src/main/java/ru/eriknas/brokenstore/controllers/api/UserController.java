@@ -26,6 +26,7 @@ import ru.eriknas.brokenstore.services.UsersService;
 import ru.eriknas.brokenstore.services.keycloak.KeycloakUserService;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -89,12 +90,15 @@ public class UserController {
 //     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
 //    public ResponseEntity<UsersEntity> getUsersById(@PathVariable
     public ResponseEntity<UserDTO> getUsersById(@PathVariable
-                                                    @Validated
-                                                    @Parameter(description = "id пользователя") int id) {
-//        UsersEntity dto = usersService.getUsersById(id);
-//        return new ResponseEntity<>(dto, HttpStatus.OK);
+                                                @Validated
+                                                @Parameter(description = "id пользователя") int id) {
         UsersEntity usersEntity = usersService.getUsersById(id);
         UserDTO userDTO = UsersMapper.toDto(usersEntity);
+
+        String role = keycloakUserService.findUser(usersEntity.getEmail())
+                .getRole();
+        userDTO.setRole(role);
+
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
@@ -109,10 +113,13 @@ public class UserController {
                                            @RequestParam(required = false, defaultValue = "10")
                                            @Parameter(description = "min: 1")
                                            @Validated @Min(1) int size) {
-        return usersService.getAllUsers(page, size)
+        List<UserDTO> users = usersService.getAllUsers(page, size)
                 .get()
                 .map(UsersMapper::toDto)
                 .collect(Collectors.toList());
+        users.parallelStream()
+                .forEach(user -> user.setRole(keycloakUserService.findUser(user.getEmail()).getRole()));
+        return users;
     }
 
     //    @GetMapping("/{email}")
