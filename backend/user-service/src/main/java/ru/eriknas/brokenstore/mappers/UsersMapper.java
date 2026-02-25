@@ -13,7 +13,6 @@ public class UsersMapper {
                 .phone(entity.getPhone())
                 .address(entity.getAddress())
                 .email(entity.getEmail())
-                .password(entity.getPassword())
                 .build();
     }
 
@@ -24,7 +23,6 @@ public class UsersMapper {
                 .phone(dto.getPhone())
                 .address(dto.getAddress())
                 .email(dto.getEmail())
-                .password(dto.getPassword())
                 .build();
     }
 }
