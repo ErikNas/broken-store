@@ -21,21 +21,17 @@ public class CoreSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-//        http.
-//                authorizeHttpRequests(auth ->
-//                {
-//                    auth.requestMatchers(HttpMethod.GET, "/t-shirt/all").permitAll();
-//                    auth.requestMatchers(HttpMethod.GET, "/t-shirt/all1").hasRole(ADMIN);
-//                    auth.anyRequest().authenticated();
-//                });
         http
-                .csrf(AbstractHttpConfigurer::disable);
-        http.
-                oauth2ResourceServer(oauth2 -> oauth2.jwt(
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/", "/css/**", "/actuator/**").permitAll();
+                    auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll();
+                    auth.anyRequest().authenticated();
+                })
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
                         jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)
-                ));
-        http.
-                sessionManagement((session) ->
+                ))
+                .sessionManagement((session) ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

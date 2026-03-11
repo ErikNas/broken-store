@@ -5,8 +5,8 @@ events {
 }
 
 http {
-    upstream client_backend {
-        server client-backend:8080;
+    upstream backend_service {
+        server backend-service:8080;
     }
 
     upstream oauth2_proxy {
@@ -17,40 +17,100 @@ http {
         listen 80;
         server_name localhost www.localhost _;
 
-        location = / {
-            proxy_pass http://client_backend;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+        # oauth2-proxy auth check (internal subrequest)
+        location = /oauth2/auth {
+            internal;
+            proxy_pass http://oauth2_proxy;
+            proxy_pass_request_body off;
+            proxy_set_header Content-Length "";
+            proxy_set_header X-Original-URI $request_uri;
         }
 
-        location /swagger-ui/ {
-            proxy_pass http://client_backend;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /webjars/ {
-            proxy_pass http://client_backend;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /api/ {
+        # oauth2-proxy endpoints (start, callback, sign_out, etc.)
+        location /oauth2/ {
             proxy_pass http://oauth2_proxy;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Auth-Request-Redirect $request_uri;
         }
 
+        # Main page - no auth
+        location = / {
+            proxy_pass http://backend_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # CSS - no auth
+        location /css/ {
+            proxy_pass http://backend_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Actuator (metrics, health) - no auth
+        location /actuator/ {
+            proxy_pass http://backend_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Swagger UI - requires Keycloak auth
+        location /swagger-ui/ {
+            auth_request /oauth2/auth;
+            error_page 401 = /oauth2/start?rd=$request_uri;
+
+            auth_request_set $auth_cookie $upstream_http_set_cookie;
+            add_header Set-Cookie $auth_cookie;
+
+            proxy_pass http://backend_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Swagger API docs - requires Keycloak auth
+        location /v3/api-docs {
+            auth_request /oauth2/auth;
+            error_page 401 = /oauth2/start?rd=$request_uri;
+
+            auth_request_set $auth_cookie $upstream_http_set_cookie;
+            add_header Set-Cookie $auth_cookie;
+
+            proxy_pass http://backend_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Swagger webjars - requires Keycloak auth
+        location /webjars/ {
+            auth_request /oauth2/auth;
+            error_page 401 = /oauth2/start?rd=$request_uri;
+
+            auth_request_set $auth_cookie $upstream_http_set_cookie;
+            add_header Set-Cookie $auth_cookie;
+
+            proxy_pass http://backend_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Everything else (API endpoints, etc.) - JWT auth handled by Spring Security
         location / {
-            proxy_pass http://client_backend;
+            proxy_pass http://backend_service;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -63,7 +123,7 @@ http {
         server_name ${AUTH_HOST};
 
         location / {
-            proxy_pass http://keycloak:8080;
+            proxy_pass http://keycloak:8082;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

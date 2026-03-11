@@ -765,16 +765,17 @@
       "clientId": "broken-store-client",
       "name": "",
       "description": "",
-      "rootUrl": "http://localhost:8080/*",
+      "rootUrl": "http://localhost",
       "adminUrl": "",
-      "baseUrl": "http://localhost:8080/*",
+      "baseUrl": "/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "6S4nbOfc26q10mlqzZB70SbdLm5r3H3H",
       "redirectUris": [
-        "http://localhost:8080/*"
+        "http://localhost/*",
+        "http://localhost:8085/*"
       ],
       "webOrigins": [
         "*"
