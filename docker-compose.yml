@@ -14,6 +14,10 @@ services:
       - service-db
     environment:
       - SERVER_PORT=8080
+      # Context path задаёт префикс для всех эндпоинтов Spring Boot (/backend-service/*).
+      # Nginx маршрутизирует запросы по этому префиксу на нужный сервис.
+      # Swagger UI доступен по адресу: http://localhost/backend-service/swagger-ui/index.html
+      - SERVER_SERVLET_CONTEXT_PATH=/backend-service
       - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/broken_store
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-admin}
@@ -36,13 +40,18 @@ services:
     build:
       context: .
       dockerfile: ./backend/user-service/user-service.dockerfile
-    ports:
-      - "8086:8080"
+    # Порт не пробрасывается наружу — доступ к user-service только через nginx-gateway.
+    # Это обеспечивает единую точку входа и авторизацию через oauth2-proxy.
+    expose:
+      - "8080"
     depends_on:
       - service-db
       - keycloak
     environment:
       - SERVER_PORT=8080
+      # Context path задаёт префикс для всех эндпоинтов Spring Boot (/user-service/*).
+      # Swagger UI доступен по адресу: http://localhost/user-service/swagger-ui/index.html
+      - SERVER_SERVLET_CONTEXT_PATH=/user-service
       - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/broken_store
       - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-admin}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-admin}
@@ -245,6 +254,10 @@ services:
       timeout: 5s
       retries: 20
 
+  # Единая точка входа для всех сервисов.
+  # Маршрутизация по префиксу пути: /backend-service/* и /user-service/*.
+  # Swagger UI обоих сервисов защищён авторизацией через oauth2-proxy + Keycloak.
+  # SSO работает автоматически: cookie oauth2-proxy общая для всех путей на localhost.
   nginx-gateway:
     image: nginx:1.25
     container_name: broken-store-nginx-gateway
@@ -259,6 +272,7 @@ services:
     command: /docker-entrypoint.sh
     depends_on:
       - backend-service
+      - user-service
       - oauth2-proxy
       - keycloak
 

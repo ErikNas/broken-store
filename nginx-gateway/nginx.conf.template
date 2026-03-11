@@ -5,8 +5,25 @@ events {
 }
 
 http {
+    # Все сервисы доступны через единый порт 80 с маршрутизацией по префиксу пути.
+    # Каждый Spring Boot сервис имеет свой context-path (SERVER_SERVLET_CONTEXT_PATH),
+    # совпадающий с префиксом в nginx. Это позволяет передавать запросы без перезаписи пути.
+    #
+    # Схема авторизации для Swagger UI:
+    # 1. Пользователь открывает /{service}/swagger-ui/index.html
+    # 2. Nginx делает внутренний subrequest на /oauth2/auth (проверка cookie _oauth2_proxy)
+    # 3. Если cookie нет или невалидна → 401 → редирект на /oauth2/start → Keycloak логин
+    # 4. После логина Keycloak редиректит на /oauth2/callback → oauth2-proxy ставит cookie
+    # 5. Cookie _oauth2_proxy привязана к домену localhost (без порта) → SSO для всех сервисов
+    #
+    # Для добавления нового сервиса: добавить upstream, блоки location по аналогии.
+
     upstream backend_service {
         server backend-service:8080;
+    }
+
+    upstream user_service {
+        server user-service:8080;
     }
 
     upstream oauth2_proxy {
@@ -17,7 +34,9 @@ http {
         listen 80;
         server_name localhost www.localhost _;
 
-        # oauth2-proxy auth check (internal subrequest)
+        # Внутренний subrequest для проверки авторизации.
+        # oauth2-proxy проверяет наличие и валидность cookie _oauth2_proxy.
+        # Возвращает 202 если авторизован, 401 если нет.
         location = /oauth2/auth {
             internal;
             proxy_pass http://oauth2_proxy;
@@ -36,35 +55,13 @@ http {
             proxy_set_header X-Auth-Request-Redirect $request_uri;
         }
 
-        # Main page - no auth
-        location = / {
-            proxy_pass http://backend_service;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        # CSS - no auth
-        location /css/ {
-            proxy_pass http://backend_service;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        # Actuator (metrics, health) - no auth
-        location /actuator/ {
-            proxy_pass http://backend_service;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
+        # --- backend-service (context-path: /backend-service) ---
+        # Swagger-эндпоинты защищены oauth2-proxy: auth_request проверяет cookie,
+        # при 401 перенаправляет на Keycloak. После авторизации rd=$request_uri
+        # возвращает пользователя на исходную страницу.
 
         # Swagger UI - requires Keycloak auth
-        location /swagger-ui/ {
+        location /backend-service/swagger-ui/ {
             auth_request /oauth2/auth;
             error_page 401 = /oauth2/start?rd=$request_uri;
 
@@ -79,7 +76,7 @@ http {
         }
 
         # Swagger API docs - requires Keycloak auth
-        location /v3/api-docs {
+        location /backend-service/v3/api-docs {
             auth_request /oauth2/auth;
             error_page 401 = /oauth2/start?rd=$request_uri;
 
@@ -94,7 +91,7 @@ http {
         }
 
         # Swagger webjars - requires Keycloak auth
-        location /webjars/ {
+        location /backend-service/webjars/ {
             auth_request /oauth2/auth;
             error_page 401 = /oauth2/start?rd=$request_uri;
 
@@ -108,13 +105,77 @@ http {
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
-        # Everything else (API endpoints, etc.) - JWT auth handled by Spring Security
-        location / {
+        # Все остальные пути backend-service (actuator, API, главная страница, css).
+        # Авторизация API-запросов обеспечивается Spring Security (JWT Bearer token).
+        location /backend-service/ {
             proxy_pass http://backend_service;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # --- user-service (context-path: /user-service) ---
+        # Аналогичная схема авторизации Swagger, как у backend-service.
+
+        # Swagger UI - requires Keycloak auth
+        location /user-service/swagger-ui/ {
+            auth_request /oauth2/auth;
+            error_page 401 = /oauth2/start?rd=$request_uri;
+
+            auth_request_set $auth_cookie $upstream_http_set_cookie;
+            add_header Set-Cookie $auth_cookie;
+
+            proxy_pass http://user_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Swagger API docs - requires Keycloak auth
+        location /user-service/v3/api-docs {
+            auth_request /oauth2/auth;
+            error_page 401 = /oauth2/start?rd=$request_uri;
+
+            auth_request_set $auth_cookie $upstream_http_set_cookie;
+            add_header Set-Cookie $auth_cookie;
+
+            proxy_pass http://user_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Swagger webjars - requires Keycloak auth
+        location /user-service/webjars/ {
+            auth_request /oauth2/auth;
+            error_page 401 = /oauth2/start?rd=$request_uri;
+
+            auth_request_set $auth_cookie $upstream_http_set_cookie;
+            add_header Set-Cookie $auth_cookie;
+
+            proxy_pass http://user_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Все остальные пути user-service (actuator, API).
+        # Авторизация API-запросов обеспечивается Spring Security (JWT Bearer token).
+        location /user-service/ {
+            proxy_pass http://user_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Root redirect to backend-service main page
+        location = / {
+            return 302 /backend-service/;
         }
     }
 
