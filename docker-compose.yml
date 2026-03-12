@@ -74,8 +74,8 @@ services:
     build:
       context: .
       dockerfile: ./backend-python/profanity-validator-service/profanity-validator-service.dockerfile
-    ports:
-      - "8087:8080"
+    expose:
+      - "8080"
     deploy:
       resources:
         limits:
@@ -123,10 +123,14 @@ services:
     image: prom/prometheus:v2.48.1
     container_name: broken-store-prometheus
     restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.external-url=/prometheus/"
+      - "--web.route-prefix=/prometheus/"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9090"]
     deploy:
@@ -142,10 +146,12 @@ services:
     image: grafana/grafana:9.5.15
     container_name: broken-store-grafana
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     volumes:
       - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/main.yaml
     depends_on:
@@ -293,6 +299,9 @@ services:
       - user-service
       - oauth2-proxy
       - keycloak
+      - grafana
+      - prometheus
+      - profanity-validator-service
 
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0

@@ -34,6 +34,18 @@ http {
         server frontend:80;
     }
 
+    upstream grafana {
+        server grafana:3000;
+    }
+
+    upstream prometheus {
+        server prometheus:9090;
+    }
+
+    upstream profanity_validator {
+        server profanity-validator-service:8080;
+    }
+
     server {
         listen 80;
         server_name localhost www.localhost _;
@@ -171,6 +183,37 @@ http {
         # Авторизация API-запросов обеспечивается Spring Security (JWT Bearer token).
         location /user-service/ {
             proxy_pass http://user_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # --- Grafana (sub-path: /grafana/) ---
+        # Grafana serves from sub-path natively via GF_SERVER_SERVE_FROM_SUB_PATH=true.
+        location /grafana/ {
+            proxy_pass http://grafana;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # --- Prometheus (sub-path: /prometheus/) ---
+        # Prometheus serves from sub-path natively via --web.route-prefix=/prometheus/.
+        location /prometheus/ {
+            proxy_pass http://prometheus;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # --- Profanity Validator (sub-path: /profanity/) ---
+        # Flask app routes are at /, so strip /profanity prefix before forwarding.
+        location /profanity/ {
+            rewrite ^/profanity/(.*) /$1 break;
+            proxy_pass http://profanity_validator;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
