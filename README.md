@@ -75,24 +75,51 @@ docker compose up --build -d
 
 Результаты успешного выполнения команды:
 ```Bash
-[+] Running 5/5
-✔ Network broken-store_default  Created                                                                                                                                                        0.0s
-✔ Container client-backend      Created                                                                                                                                                        0.0s
-✔ Container prometheus          Created                                                                                                                                                        0.0s
-✔ Container cadvisor-exporter   Created                                                                                                                                                        0.1s
-✔ Container grafana             Created 
+[+] Running 12/12
+✔ Network broken-store_default                   Created
+✔ Container broken-store-postgres-db             Created
+✔ Container broken-store-minio                   Created
+✔ Container broken-store-keycloak                Created
+✔ Container broken-store-profanity-validator-service  Created
+✔ Container broken-store-backend-service         Created
+✔ Container broken-store-user-service            Created
+✔ Container broken-store-oauth2-proxy            Created
+✔ Container broken-store-nginx-gateway           Created
+✔ Container broken-store-prometheus              Created
+✔ Container broken-store-cadvisor-exporter       Created
+✔ Container broken-store-grafana                 Created
 ```
 
 где:
 
-- *client-backend* - контейнер с бекендом приложения. Доступен по адресу http://127.0.0.1:8085, сваггер http://127.0.0.1:8085/swagger-ui/index.html
+- *broken-store-nginx-gateway* - реверс-прокси (nginx). Точка входа в приложение. Доступен по адресу http://localhost (порт 80).
+Главная страница открывается без авторизации. Swagger http://localhost/swagger-ui/index.html требует авторизацию через Keycloak
 
-- *prometheus* - контейнер с prometheus, который отвечает за сбор метрик с самого приложения и с cadvisor-exporter
+- *broken-store-backend-service* - контейнер с основным бэкендом приложения (футболки, новости, заказы, файлы).
+Прямой доступ: http://127.0.0.1:8085, Swagger: http://127.0.0.1:8085/swagger-ui/index.html
+
+- *broken-store-user-service* - контейнер с сервисом пользователей (интеграция с Keycloak).
+Прямой доступ: http://127.0.0.1:8086
+
+- *broken-store-profanity-validator-service* - контейнер с Python-сервисом валидации нецензурной лексики.
+Прямой доступ: http://127.0.0.1:8087
+
+- *broken-store-keycloak* - контейнер с Keycloak для аутентификации и авторизации.
+Доступен по адресу http://localhost:8082 (логин/пароль: admin/admin)
+
+- *broken-store-oauth2-proxy* - прокси аутентификации, обеспечивает защиту Swagger через Keycloak
+
+- *broken-store-postgres-db* - контейнер с PostgreSQL. Доступен по адресу localhost:15432 (логин/пароль: admin/admin, БД: broken_store)
+
+- *broken-store-minio* - контейнер с объектным хранилищем MinIO.
+API: http://127.0.0.1:9000, Консоль: http://127.0.0.1:9001
+
+- *broken-store-prometheus* - контейнер с prometheus, который отвечает за сбор метрик с самого приложения и с cadvisor-exporter.
 Доступен по адресу http://127.0.0.1:9090
 
-- *cadvisor-exporter* - контейнер с cadvisor, который снимает метрики с докер контейнеров (ЦПУ, память, сеть)
+- *broken-store-cadvisor-exporter* - контейнер с cadvisor, который снимает метрики с докер контейнеров (ЦПУ, память, сеть)
 
-- *grafana* - контейнер с графаной, которая позволяет просматривать собранные метрики на красивых графиках
+- *broken-store-grafana* - контейнер с графаной, которая позволяет просматривать собранные метрики на красивых графиках.
 При поднятии контейнера datasource с prometheus добавляется автоматически. Дашборды для графиков необходимо добавить вручную
 (дашборды сохранены в grafana/dashboards). Доступен по адресу http://127.0.0.1:3000
 
