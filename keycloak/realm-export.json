@@ -775,7 +775,8 @@
       "secret": "6S4nbOfc26q10mlqzZB70SbdLm5r3H3H",
       "redirectUris": [
         "http://localhost/*",
-        "http://localhost:8085/*"
+        "http://localhost:8085/*",
+        "http://broken-store.ru/*"
       ],
       "webOrigins": [
         "*"

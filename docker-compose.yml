@@ -242,8 +242,8 @@ services:
       KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/data/import/server.key
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_PASSWORD:-admin}
-      KC_HOSTNAME_URL: http://localhost:8082
-      KC_HOSTNAME_ADMIN_URL: http://localhost:8082
+      KC_HOSTNAME_URL: ${KEYCLOAK_HOSTNAME_URL:-http://localhost:8082}
+      KC_HOSTNAME_ADMIN_URL: ${KEYCLOAK_HOSTNAME_URL:-http://localhost:8082}
       KC_HOSTNAME_STRICT_BACKCHANNEL: true
       KC_HTTP_RELATIVE_PATH: /
       KC_HTTP_PORT: 8082
@@ -310,6 +310,12 @@ services:
       - 4180:4180/tcp
     volumes:
       - "./oauth2-proxy/oauth2-proxy.cfg:/oauth2-proxy.cfg"
+    environment:
+      # Переопределяют значения из oauth2-proxy.cfg для поддержки разных окружений.
+      # Локально: login через localhost:8082, callback на localhost.
+      # Прод: login через auth.broken-store.ru, callback на broken-store.ru.
+      OAUTH2_PROXY_LOGIN_URL: ${KEYCLOAK_HOSTNAME_URL:-http://localhost:8082}/realms/broken-store-realm/protocol/openid-connect/auth
+      OAUTH2_PROXY_REDIRECT_URL: http://${FRONTEND_HOST:-localhost}/oauth2/callback
     command: --config /oauth2-proxy.cfg
     depends_on:
       keycloak:
