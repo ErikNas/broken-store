@@ -1,0 +1,160 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0f1923;
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+h1 {
+    text-align: center;
+    padding: 24px 0 8px;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: #fff;
+}
+
+#diagram {
+    position: relative;
+    width: 960px;
+    height: 820px;
+    margin: 16px auto 32px;
+}
+
+#connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+#connections line {
+    stroke: #3a506b;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+#connections line:hover {
+    stroke: #6fffe9;
+    stroke-width: 3;
+}
+
+/* --- Nodes --- */
+.node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    background: #1b2838;
+    border: 1px solid #2a3f54;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #c5d0dc;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    z-index: 1;
+    min-width: 100px;
+    text-align: center;
+}
+
+.node:hover {
+    transform: translateY(-3px);
+    border-color: #6fffe9;
+    box-shadow: 0 4px 20px rgba(111, 255, 233, 0.15);
+    z-index: 10;
+}
+
+.node.no-link {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.node.no-link:hover {
+    border-color: #4a5568;
+    box-shadow: none;
+    transform: none;
+}
+
+.node img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.1));
+}
+
+.node span {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* --- Tooltip --- */
+.node[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #253346;
+    color: #e0e0e0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+}
+
+/* --- Node positions (6-row layout) --- */
+
+/* Row 0: Frontend */
+#frontend       { top: 10px;  left: 410px; }
+
+/* Row 1: Nginx */
+#nginx          { top: 130px; left: 410px; }
+
+/* Row 2: oauth2-proxy, backend-service, user-service */
+#oauth2-proxy   { top: 270px; left: 100px; }
+#backend-service{ top: 270px; left: 380px; }
+#user-service   { top: 270px; left: 700px; }
+
+/* Row 3: keycloak, minio, postgres, profanity */
+#keycloak       { top: 420px; left: 60px; }
+#minio          { top: 420px; left: 270px; }
+#postgres       { top: 420px; left: 490px; }
+#profanity      { top: 420px; left: 710px; }
+
+/* Row 4: prometheus, cadvisor */
+#prometheus     { top: 570px; left: 310px; }
+#cadvisor       { top: 570px; left: 560px; }
+
+/* Row 5: grafana */
+#grafana        { top: 700px; left: 410px; }
+
+/* --- Responsive --- */
+@media (max-width: 1000px) {
+    #diagram {
+        transform: scale(0.75);
+        transform-origin: top center;
+    }
+}
+
+@media (max-width: 700px) {
+    #diagram {
+        transform: scale(0.5);
+        transform-origin: top center;
+    }
+}
