@@ -11,7 +11,8 @@ services:
 #    expose:
 #      - "8080"
     depends_on:
-      - service-db
+      service-db:
+        condition: service_healthy
     environment:
       - SERVER_PORT=8080
       # Context path задаёт префикс для всех эндпоинтов Spring Boot (/backend-service/*).
@@ -25,14 +26,15 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - MINIO_URL=minio
       - PROFANITY_VALIDATOR_SERVICE_URL=http://profanity-validator-service:8080
+      - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
           cpus: "0.5"
-          memory: 512M
+          memory: 384M
         reservations:
           cpus: "0.5"
-          memory: 512M
+          memory: 256M
 
   user-service:
     image: user-service:0.0.1
@@ -45,8 +47,10 @@ services:
     expose:
       - "8080"
     depends_on:
-      - service-db
-      - keycloak
+      service-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     environment:
       - SERVER_PORT=8080
       # Context path задаёт префикс для всех эндпоинтов Spring Boot (/user-service/*).
@@ -59,14 +63,15 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - KC_SERVER_URL=http://keycloak:8082
       - PROFANITY_VALIDATOR_SERVICE_URL=http://profanity-validator-service:8080
+      - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
         limits:
           cpus: "0.5"
-          memory: 512M
+          memory: 384M
         reservations:
           cpus: "0.5"
-          memory: 512M
+          memory: 256M
 
   profanity-validator-service:
     image: profanity-validator-service:0.0.1
@@ -80,10 +85,10 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: 512M
+          memory: 256M
         reservations:
           cpus: "0.5"
-          memory: 512M
+          memory: 128M
 
   service-db:
     image: postgres:14.7-alpine
@@ -98,14 +103,20 @@ services:
       - ./db/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
       - db-data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d broken_store"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     deploy:
       resources:
         limits:
           cpus: "0.5"
-          memory: 512M
+          memory: 256M
         reservations:
           cpus: "0.5"
-          memory: 512M
+          memory: 128M
 
   ##  pgadmin:
   ##    container_name: pgadmin4_container
@@ -133,14 +144,18 @@ services:
       - "9090"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9090"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     deploy:
       resources:
         limits:
           cpus: "0.5"
-          memory: 512M
+          memory: 256M
         reservations:
           cpus: "0.5"
-          memory: 512M
+          memory: 128M
 
   grafana:
     image: grafana/grafana:9.5.15
@@ -158,14 +173,18 @@ services:
       - prometheus
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     deploy:
       resources:
         limits:
           cpus: "0.5"
-          memory: 512M
+          memory: 256M
         reservations:
           cpus: "0.5"
-          memory: 512M
+          memory: 128M
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -187,7 +206,10 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: 512M
+          memory: 128M
+        reservations:
+          cpus: "0.25"
+          memory: 64M
 
   minio:
     image: minio/minio:RELEASE.2025-01-20T14-49-07Z
@@ -207,6 +229,12 @@ services:
     #   interval: 30s
     #   timeout: 20s
     #   retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   minio-settings:
     image: minio/mc:RELEASE.2025-03-12T17-29-24Z
@@ -252,13 +280,21 @@ services:
       KC_HTTPS_ENABLED: true
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
+      JAVA_OPTS_APPEND: -Xms256m -Xmx512m
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
       test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;" ]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 20
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 512M
 
   frontend:
     image: frontend:0.0.1
