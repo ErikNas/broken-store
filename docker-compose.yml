@@ -254,6 +254,23 @@ services:
       timeout: 5s
       retries: 20
 
+  frontend:
+    image: frontend:0.0.1
+    container_name: broken-store-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    expose:
+      - "80"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
   # Единая точка входа для всех сервисов.
   # Маршрутизация по префиксу пути: /backend-service/* и /user-service/*.
   # Swagger UI обоих сервисов защищён авторизацией через oauth2-proxy + Keycloak.
@@ -271,6 +288,7 @@ services:
       - ./nginx-gateway/nginx-docker-entrypoint.sh:/docker-entrypoint.sh  # монтируем скрипт
     command: /docker-entrypoint.sh
     depends_on:
+      - frontend
       - backend-service
       - user-service
       - oauth2-proxy

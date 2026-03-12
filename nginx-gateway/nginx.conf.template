@@ -30,6 +30,10 @@ http {
         server oauth2-proxy:4180;
     }
 
+    upstream frontend {
+        server frontend:80;
+    }
+
     server {
         listen 80;
         server_name localhost www.localhost _;
@@ -173,9 +177,13 @@ http {
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
-        # Root redirect to backend-service main page
-        location = / {
-            return 302 /backend-service/;
+        # Frontend — architecture diagram (main page)
+        location / {
+            proxy_pass http://frontend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
         }
     }
 
