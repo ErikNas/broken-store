@@ -36,10 +36,6 @@ public class UsersEntity {
     private String address;
 
     @JsonIgnore
-    @Column(name = "password")
-    private String password;
-
-    @JsonIgnore
     @Column(name = "archived_at")
     private OffsetDateTime archivedAt;
 
