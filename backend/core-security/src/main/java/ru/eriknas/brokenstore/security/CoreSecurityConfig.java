@@ -26,6 +26,7 @@ public class CoreSecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/", "/css/**", "/actuator/**").permitAll();
                     auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll();
+                    auth.requestMatchers("/auth/login").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(

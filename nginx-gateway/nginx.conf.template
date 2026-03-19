@@ -122,8 +122,27 @@ http {
         }
 
         # Все остальные пути backend-service (actuator, API, главная страница, css).
-        # Авторизация API-запросов обеспечивается Spring Security (JWT Bearer token).
+        # Если пользователь авторизован через oauth2-proxy (есть cookie), nginx извлекает
+        # access token и подставляет его как Authorization: Bearer — это позволяет
+        # отправлять запросы из Swagger UI без повторной авторизации.
+        # Если cookie нет (прямой вызов API с Bearer token), запрос проходит как есть.
         location /backend-service/ {
+            auth_request /oauth2/auth;
+            error_page 401 = @backend_service_noauth;
+
+            auth_request_set $access_token $upstream_http_x_auth_request_access_token;
+            proxy_set_header Authorization "Bearer $access_token";
+
+            proxy_pass http://backend_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Fallback для backend-service: прямые API-вызовы без cookie oauth2-proxy.
+        # Авторизация обеспечивается Spring Security (JWT Bearer token от клиента).
+        location @backend_service_noauth {
             proxy_pass http://backend_service;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
@@ -180,8 +199,24 @@ http {
         }
 
         # Все остальные пути user-service (actuator, API).
-        # Авторизация API-запросов обеспечивается Spring Security (JWT Bearer token).
+        # Аналогично backend-service: если есть cookie oauth2-proxy, access token
+        # подставляется автоматически. Иначе — fallback на прямой вызов.
         location /user-service/ {
+            auth_request /oauth2/auth;
+            error_page 401 = @user_service_noauth;
+
+            auth_request_set $access_token $upstream_http_x_auth_request_access_token;
+            proxy_set_header Authorization "Bearer $access_token";
+
+            proxy_pass http://user_service;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Fallback для user-service: прямые API-вызовы без cookie oauth2-proxy.
+        location @user_service_noauth {
             proxy_pass http://user_service;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;

@@ -26,6 +26,7 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - MINIO_URL=minio
       - PROFANITY_VALIDATOR_SERVICE_URL=http://profanity-validator-service:8080
+      - KC_SERVER_URL=http://keycloak:8082
       - JAVA_OPTS=-Xms128m -Xmx256m
     deploy:
       resources:
