@@ -10,4 +10,5 @@ public class Constants {
     public static final String TSHIRT_NOT_FOUND = "Футболка с id=%s не найдена";
     public static final String TSHIRT_ID_REQUIRED = "Необходимо указать id футболки";
     public static final String USER_NOT_FOUND = "Пользователь с id=%s не найден";
+    public static final String USER_NOT_FOUND_IN_KEYCLOAK = "Пользователь с email=%s не найден в keycloak";
 }
