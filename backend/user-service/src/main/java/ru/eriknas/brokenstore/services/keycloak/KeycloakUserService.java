@@ -2,6 +2,7 @@ package ru.eriknas.brokenstore.services.keycloak;
 
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.eriknas.brokenstore.dto.users.Role;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
+import ru.eriknas.brokenstore.exception.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
+import static ru.eriknas.brokenstore.common.Constants.USER_NOT_FOUND_IN_KEYCLOAK;
 
 @Service
 public class KeycloakUserService {
@@ -101,6 +104,23 @@ public class KeycloakUserService {
         Keycloak keycloak = keycloakUtil.getKeycloakInstance();
         keycloak.realm(realm).users().get(String.valueOf(user.getId())).update(userRep);
         return Response.ok(user).build();
+    }
+
+    public void disableUser(String email) {
+        UsersResource users = keycloakUtil.getKeycloakInstance()
+                .realm(realm)
+                .users();
+        List<UserRepresentation> usersRepresentations = users
+                .searchByEmail(email, true);
+        if (usersRepresentations.isEmpty()) {
+            throw new NotFoundException(String.format(USER_NOT_FOUND_IN_KEYCLOAK, email));
+        }
+
+        String keycloakUserId = usersRepresentations.get(0).getId();
+        UserRepresentation disableUser = new UserRepresentation();
+        disableUser.setEnabled(false);
+        users.get(keycloakUserId)
+                .update(disableUser);
     }
 
     public Response deleteUser(@PathVariable("id") String id) {

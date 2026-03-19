@@ -75,8 +75,9 @@ public class UserController {
     public ResponseEntity<Void> deleteUsers(@PathVariable
                                             @Validated
                                             @Parameter(description = "id пользователя") int id) {
-        usersService.getUsersById(id);
+        UsersEntity user = usersService.getUsersById(id);
         usersService.deleteById(id);
+        keycloakUserService.disableUser(user.getEmail());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -88,7 +89,6 @@ public class UserController {
             content = @Content(schema = @Schema(implementation = Error.class)))
 //    todo вернуть роли. Отключено для работы backend-service
 //     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-//    public ResponseEntity<UsersEntity> getUsersById(@PathVariable
     public ResponseEntity<UserDTO> getUsersById(@PathVariable
                                                 @Validated
                                                 @Parameter(description = "id пользователя") int id) {
