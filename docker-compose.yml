@@ -8,6 +8,7 @@ services:
       dockerfile: ./backend/backend-service/backend-service.dockerfile
     ports:
       - "8085:8080"
+#      - "5005:5005" # TO DEBUG
 #    expose:
 #      - "8080"
     depends_on:
@@ -27,7 +28,9 @@ services:
       - MINIO_URL=minio
       - PROFANITY_VALIDATOR_SERVICE_URL=http://profanity-validator-service:8080
       - KC_SERVER_URL=http://keycloak:8082
+      - USER_SERVICE_URL=http://user-service:8080
       - JAVA_OPTS=-Xms128m -Xmx256m
+#      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 # TO DEBUG
     deploy:
       resources:
         limits:

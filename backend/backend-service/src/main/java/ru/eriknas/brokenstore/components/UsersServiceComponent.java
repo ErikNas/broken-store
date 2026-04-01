@@ -1,25 +1,34 @@
 package ru.eriknas.brokenstore.components;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class UsersServiceComponent {
     private final RestClient usersServiceClient;
 
-    @Autowired
-    public UsersServiceComponent(@Qualifier("usersServiceClient") RestClient client) {
-        this.usersServiceClient = client;
-    }
-
+    /**
+     * Проверяет существование пользователя по ID.
+     *
+     * @param userId ID пользователя
+     * @return ResponseEntity с статусом ответа
+     * @throws RestClientResponseException если пользователь не найден
+     */
     public ResponseEntity<Void> getUser(int userId) throws RestClientResponseException {
-        return usersServiceClient.get()
-                .uri("/users/{id}", userId)
+        log.debug("Checking user existence: userId={}", userId);
+
+        ResponseEntity<Void> response = usersServiceClient.get()
+                .uri("/user-service/users/{id}", userId)
                 .retrieve()
                 .toBodilessEntity();
+
+        log.debug("User service response: status={}, userId={}", response.getStatusCode(), userId);
+        return response;
     }
 }
