@@ -53,7 +53,7 @@ public class UserController {
     @ApiResponse(responseCode = "422", description = "Email уже существует",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_USER')")
     public ResponseEntity<?> createUser(@RequestBody @Validated UserDTO dto) throws Exception {
         profanityValidatorService.validateProfanity(dto.toString());
         if (!isValidPassword(dto.getPassword())) {
@@ -71,7 +71,7 @@ public class UserController {
     @ApiResponse(responseCode = "204 NoContent", description = "Пользователь удален")
     @ApiResponse(responseCode = "404 NotFound", description = "Пользователь не найден",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteUsers(@PathVariable
                                             @Validated
                                             @Parameter(description = "id пользователя") int id) {
@@ -106,7 +106,7 @@ public class UserController {
     @Operation(summary = "Получить список всех сотрудников")
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
 //    @ApiResponse(responseCode = "200 OK")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_MANAGER')")
     public Collection<UserDTO> getAllUsers(@RequestParam(required = false, defaultValue = "0")
                                            @Parameter(description = "min: 0")
                                            @Validated @Min(0) int page,

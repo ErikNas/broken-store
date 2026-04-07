@@ -54,7 +54,7 @@ public class NewsController {
     @ApiResponse(responseCode = "204 NoContent", description = "Новость удалена")
     @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteNews(@PathVariable
                                            @Validated
                                            @Parameter(description = "id новости") int id) {
@@ -68,7 +68,7 @@ public class NewsController {
     @ApiResponse(responseCode = "404 NotFound", description = "Новость не найдена",
             content = @Content(schema = @Schema(implementation = Error.class)))
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_USER')")
     public ResponseEntity<NewsDTO> getNewsById(@PathVariable
                                                @Validated
                                                @Parameter(description = "id новости") int id) {
@@ -81,7 +81,7 @@ public class NewsController {
     @GetMapping
     @Operation(summary = "Получить список всех новостей")
     @ApiResponse(responseCode = "200 OK", useReturnTypeSchema = true)
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER') or hasRole('ROLE_USER')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_MANAGER') or hasAuthority('ROLE_USER')")
     public Collection<NewsDTO> getAllNews(@RequestParam(required = false, defaultValue = "0")
                                           @Parameter(description = "min: 0")
                                           @Validated @Min(0) int page,
