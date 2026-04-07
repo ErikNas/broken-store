@@ -5,9 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -33,9 +30,6 @@ import ru.eriknas.brokenstore.services.TShirtService;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequestMapping("/t-shirt")
@@ -128,12 +122,8 @@ public class TShirtController {
         if (id == null || id.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("ID футболки не может быть пустым"); //404
         }
-        try {
-            TShirtsEntity dto = tShirtsService.getTShirtById(id);
-            return ResponseEntity.ok(dto);
-        } catch (EntityNotFoundException ex) {
-            return ResponseEntity.notFound().build();
-        }
+        TShirtsEntity dto = tShirtsService.getTShirtById(id);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/all")

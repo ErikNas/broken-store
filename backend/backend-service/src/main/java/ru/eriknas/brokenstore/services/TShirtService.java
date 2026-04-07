@@ -1,6 +1,5 @@
 package ru.eriknas.brokenstore.services;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,9 +32,9 @@ public class TShirtService {
     }
 
     public TShirtsInfoDTO createTShirt(@Valid TShirtCreateDTO dto) {
-            if (dto.getPrice() != null && dto.getPrice() % 1 == 0) {
-                dto.setPrice(dto.getPrice().doubleValue());
-            }
+        if (dto.getPrice() != null && dto.getPrice() % 1 == 0) {
+            dto.setPrice(dto.getPrice().doubleValue());
+        }
         TShirtsEntity entity = TShirtsMapper.toEntity(dto);
         entity.setCreatedAt(OffsetDateTime.now());
 //        entity.setIsActive(true);
@@ -64,9 +63,8 @@ public class TShirtService {
     }
 
     public TShirtsEntity getTShirtById(String id) {
-        //добавлена проверка ввода пустого значения
         return tShirtsRepository.findById(Integer.valueOf(id))
-                .orElseThrow(() -> new EntityNotFoundException("Футболка ID" + id + "не найдена"));
+                .orElseThrow(() -> new NotFoundException("Футболка ID " + id + "не найдена"));
     }
 
 //    public Page<TShirtsEntity> getAllTShirts(int page, int size, boolean isActive) {
