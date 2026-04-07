@@ -55,7 +55,7 @@ public class TShirtController {
             content = @Content(schema = @Schema(implementation = Error.class)))
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<?> createTShirt(@RequestBody @Validated TShirtCreateDTO dto,
+    public ResponseEntity<?> createTShirt(@RequestPart("dto") @Validated TShirtCreateDTO dto,
                                           @RequestPart(value = "picture", required = false) MultipartFile picture) {
         profanityValidatorService.validateProfanity(dto.toString());
         TShirtsInfoDTO created = tShirtsService.createTShirt(dto);
