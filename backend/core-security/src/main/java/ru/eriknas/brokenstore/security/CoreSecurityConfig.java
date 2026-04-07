@@ -3,12 +3,14 @@ package ru.eriknas.brokenstore.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -27,6 +29,9 @@ public class CoreSecurityConfig {
                     auth.requestMatchers("/", "/css/**", "/actuator/**").permitAll();
                     auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll();
                     auth.requestMatchers("/auth/login").permitAll();
+                    // Публичный GET /users/{numericId} — нужен для межсервисного вызова
+                    // backend-service → user-service при создании заказа.
+                    auth.requestMatchers(RegexRequestMatcher.regexMatcher(HttpMethod.GET, "/users/\\d+")).permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(
