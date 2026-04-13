@@ -26,6 +26,9 @@ public class TShirtsMapper {
                 .description(entity.getDescription())
                 .price(entity.getPrice())
                 .isActive(entity.getIsActive() != null ? entity.getIsActive() : true)
+                .archivedAt(entity.getArchivedAt() != null ? entity.getArchivedAt().toInstant() : null)
+                .createdAt(entity.getCreatedAt() != null ? entity.getCreatedAt().toInstant() : null)
+                .updatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt().toInstant() : null)
                 .build();
 
     }
