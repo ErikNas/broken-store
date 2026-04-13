@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.eriknas.brokenstore.dto.users.Role;
 import ru.eriknas.brokenstore.dto.users.UserDTO;
+import ru.eriknas.brokenstore.exception.EmailAlreadyExistsException;
 import ru.eriknas.brokenstore.exception.NotFoundException;
 
 import java.util.ArrayList;
@@ -78,6 +79,10 @@ public class KeycloakUserService {
                 .realm(realm)
                 .users()
                 .create(userRep);
+        String errorBody = response.hasEntity() ? response.readEntity(String.class) : "unknown";
+        if (response.getStatus() == Response.Status.CONFLICT.getStatusCode() || errorBody.contains("already exists")) {
+            throw new EmailAlreadyExistsException(String.format("email %s уже занят", user.getEmail()));
+        }
         if (response.getStatus() != 201) {
             throw new Exception("Не удалось добавить пользователя в keycloak: " + response.getStatusInfo());
         }
